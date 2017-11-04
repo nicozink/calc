@@ -20,9 +20,19 @@ ADD_FLEX_BISON_DEPENDENCY(calc_flex calc_bison)
 
 set(SRC_PARSER
 	${FLEX_calc_flex_OUTPUTS}
-	${BISON_calc_bison_OUTPUTS})
+	${BISON_calc_bison_OUTPUTS}
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc.cpp)
 
 add_library(calc_parser ${SRC_PARSER})
+
+target_include_directories(calc_parser
+	PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/src
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser)
+
+target_compile_features(calc_parser
+	PRIVATE
+	cxx_auto_type)
 
 set(SRC_MAIN
 	${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
