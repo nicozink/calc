@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <string>
 #include "calc.h"
 int yylex(void);
 void yyerror(char*);
@@ -7,8 +8,8 @@ void yyerror(char*);
 
 %define api.value.type union
 %token <double> NUM
-%token <struct calc_symbol*> VAR
-%type <double> expr
+%token <char*> IDENTIFIER
+%type <struct tree_node*> expr
 
 %left '-' '+'
 %left '*' '/'
@@ -18,19 +19,19 @@ void yyerror(char*);
 %%
 
 program:
-	program expr '\n'	{ printf("%.10g\n", $2); }
+	program expr '\n'	{ eval_tree($2); }
 	|
 	;
 
 expr:
-	NUM { $$ = $1; }
-	| VAR { $$ = $1->value; }
-	| VAR '=' expr { $$ = $3; $1->value = $3; }
-	| expr '+' expr { $$ = $1 + $3; }
-	| expr '-' expr { $$ = $1 - $3; }
-	| expr '*' expr { $$ = $1 * $3; }
-	| expr '/' expr { $$ = $1 / $3; }
-	| '-' expr %prec NEG { $$ = -$2; }
+	NUM { $$ = new num_node($1); }
+	| IDENTIFIER { $$ = new identifier_node(new std::string($1)); }
+	| IDENTIFIER '=' expr { $$ = new assignment_node(new std::string($1), $3); }
+	| expr '+' expr { $$ = new binary_operator_node('+', $1, $3); }
+	| expr '-' expr { $$ = new binary_operator_node('-', $1, $3); }
+	| expr '*' expr { $$ = new binary_operator_node('*', $1, $3);; }
+	| expr '/' expr { $$ = new binary_operator_node('/', $1, $3); }
+	| '-' expr %prec NEG { $$ = new unary_operator_node('-', $2); }
 	| '(' expr ')' { $$ = $2; }
 	;
 

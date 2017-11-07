@@ -1,10 +1,9 @@
 %{
 #include <stdlib.h>
+#include <string>
 void yyerror(char*);
 #include "calc_parser.hpp"
 #include "calc.h"
-
-static symbol_table symbols;
 %}
 
 %%
@@ -15,18 +14,9 @@ static symbol_table symbols;
 }
 
 [a-zA-Z_][a-zA-Z0-9]* {
-	std::string identifier(yytext);
+	yylval.IDENTIFIER = strdup(yytext);
 
-	if (symbols.exists(identifier))
-	{
-		yylval.VAR = symbols.get(identifier);
-	}
-	else
-	{
-		yylval.VAR = symbols.add(identifier, 0.0);
-	}
-
-	return VAR;
+	return IDENTIFIER;
 }
 
 [-+*/=()\n] {
