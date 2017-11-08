@@ -8,6 +8,10 @@ void yyerror(char*);
 
 %%
 
+"print" {
+	return PRINT;
+}
+
 [0-9]\.?[0-9]* {
 	yylval.NUM = atof(yytext);
 	return NUM;
@@ -19,11 +23,11 @@ void yyerror(char*);
 	return IDENTIFIER;
 }
 
-[-+*/=()\n] {
+[-+*/=(){};] {
 	return *yytext;
 }
 
-[\t] {
+[\t\n] {
 	/* skip whitespace */
 }
 

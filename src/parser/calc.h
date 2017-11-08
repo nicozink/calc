@@ -103,4 +103,4 @@ struct identifier_node : public tree_node
     std::string* name;
 };
 
-void eval_tree(tree_node* node);
+double solve_node(tree_node* node);

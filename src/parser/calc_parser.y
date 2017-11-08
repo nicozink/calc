@@ -9,6 +9,7 @@ void yyerror(char*);
 %define api.value.type union
 %token <double> NUM
 %token <char*> IDENTIFIER
+%token PRINT
 %type <struct tree_node*> expr
 
 %left '-' '+'
@@ -16,12 +17,24 @@ void yyerror(char*);
 %precedence NEG
 %right '^'
 
+%start program
+
 %%
 
 program:
-	program expr '\n'	{ eval_tree($2); }
+	statement_list
+	| '{' statement_list '}'
 	|
 	;
+
+statement_list:
+	statement_list statement
+	|
+	;
+
+statement:
+	PRINT '(' expr ')' { printf("%.10g\n", solve_node($3)); }
+	| expr { solve_node($1); }
 
 expr:
 	NUM { $$ = new num_node($1); }

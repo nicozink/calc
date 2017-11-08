@@ -145,8 +145,3 @@ double solve_node(tree_node* node)
             return solve_node(static_cast<identifier_node*>(node));
     }
 }
-
-void eval_tree(tree_node* node)
-{
-    printf("%.10g\n", solve_node(node));
-}
