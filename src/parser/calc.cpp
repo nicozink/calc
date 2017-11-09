@@ -112,6 +112,13 @@ double solve_node(assignment_node* node)
     }
 }
 
+double solve_node(print_node* node)
+{
+    double value = solve_node(node->node);
+
+    printf("%.10g\n", value);
+}
+
 double solve_node(identifier_node* node)
 {
     std::string* name = node->name;
@@ -123,6 +130,19 @@ double solve_node(identifier_node* node)
     }
 
     throw "Should not be here.";
+}
+
+double solve_node(statement_list_node* node)
+{
+    for (auto statement : node->statements)
+    {
+        solve_node(statement);
+    }
+}
+
+double solve_node(block_node* node)
+{
+    solve_node(node->statements);
 }
 
 double solve_node(tree_node* node)
@@ -141,7 +161,16 @@ double solve_node(tree_node* node)
         case node_type::ASSIGNMENT:
             return solve_node(static_cast<assignment_node*>(node));
 
+        case node_type::PRINT:
+            return solve_node(static_cast<print_node*>(node));
+        
         case node_type::IDENTIFIER:
             return solve_node(static_cast<identifier_node*>(node));
+        
+        case node_type::STATEMENT_LIST:
+            return solve_node(static_cast<statement_list_node*>(node));
+
+        case node_type::BLOCK:
+            return solve_node(static_cast<block_node*>(node));
     }
 }

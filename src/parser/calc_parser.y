@@ -12,7 +12,11 @@ void c_comp_error(char*);
 %token <double> NUM
 %token <char*> IDENTIFIER
 %token PRINT
-%type <struct tree_node*> expr
+
+%type <struct block_node*> block
+%type <struct statement_list_node*> statement_list
+%type <struct statement_node*> statement
+%type <struct expr_node*> expr
 
 %left '-' '+'
 %left '*' '/'
@@ -24,27 +28,27 @@ void c_comp_error(char*);
 %%
 
 program:
-	statement_list
-	| block
+	program expr { printf("%.10g\n", solve_node($2)); }
+	| program statement_list { solve_node($2); }
 	|
+	;
+
+statement_list:
+	statement_list statement { $1->add($2); $$=$1; }
+	| statement_list block { $1->add($2); $$=$1; }
+	| { $$ = new statement_list_node(); }
 	;
 
 block:
-	'{' statement_list '}'
-
-statement_list:
-	statement_list statement
-	|
-	;
+	'{' statement_list '}' { $$ = new block_node($2); }
 
 statement:
-	PRINT '(' expr ')' { printf("%.10g\n", solve_node($3)); }
-	| expr { solve_node($1); }
+	PRINT '(' expr ')' { $$ = new print_node($3); }
+	| IDENTIFIER '=' expr { $$ = new assignment_node(new std::string($1), $3); }
 
 expr:
 	NUM { $$ = new num_node($1); }
 	| IDENTIFIER { $$ = new identifier_node(new std::string($1)); }
-	| IDENTIFIER '=' expr { $$ = new assignment_node(new std::string($1), $3); }
 	| expr '+' expr { $$ = new binary_operator_node('+', $1, $3); }
 	| expr '-' expr { $$ = new binary_operator_node('-', $1, $3); }
 	| expr '*' expr { $$ = new binary_operator_node('*', $1, $3);; }
