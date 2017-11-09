@@ -1,10 +1,12 @@
 %{
 #include <stdlib.h>
 #include <string>
-void yyerror(char*);
+void c_comp_error(char*);
 #include "calc_parser.hpp"
 #include "calc.h"
 %}
+
+%option prefix="c_comp_"
 
 %%
 
@@ -13,18 +15,18 @@ void yyerror(char*);
 }
 
 [0-9]\.?[0-9]* {
-	yylval.NUM = atof(yytext);
+	c_comp_lval.NUM = atof(c_comp_text);
 	return NUM;
 }
 
 [a-zA-Z_][a-zA-Z0-9]* {
-	yylval.IDENTIFIER = strdup(yytext);
+	c_comp_lval.IDENTIFIER = strdup(c_comp_text);
 
 	return IDENTIFIER;
 }
 
 [-+*/=(){};] {
-	return *yytext;
+	return *c_comp_text;
 }
 
 [\t\n] {
@@ -32,12 +34,12 @@ void yyerror(char*);
 }
 
 . {
-	yyerror("invalid charactr");
+	c_comp_error("invalid charactr");
 }
 
 %%
 
-int yywrap(void) {
+int c_comp_wrap(void) {
 	return 1;
 }
 

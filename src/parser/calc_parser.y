@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <string>
 #include "calc.h"
-int yylex(void);
-void yyerror(char*);
+int c_comp_lex(void);
+void c_comp_error(char*);
 %}
+
+%define api.prefix c_comp_
 
 %define api.value.type union
 %token <double> NUM
@@ -23,9 +25,12 @@ void yyerror(char*);
 
 program:
 	statement_list
-	| '{' statement_list '}'
+	| block
 	|
 	;
+
+block:
+	'{' statement_list '}'
 
 statement_list:
 	statement_list statement
@@ -50,7 +55,7 @@ expr:
 
 %%
 
-void yyerror(char* s)
+void c_comp_error(char* s)
 {
 	fprintf(stderr, "%s\n", s);
 }
