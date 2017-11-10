@@ -29,6 +29,8 @@ private:
 
 enum class node_type
 {
+    FUNCTION,
+    PARAMETER_LIST,
     BLOCK,
     STATEMENT_LIST,
     NUM,
@@ -36,6 +38,7 @@ enum class node_type
     UNARY_OPERATOR,
     ASSIGNMENT,
     PRINT,
+    RETURN,
     IDENTIFIER
 };
 
@@ -117,6 +120,17 @@ struct print_node : public statement_node
     tree_node* node;
 };
 
+struct return_node : public statement_node
+{
+    return_node(tree_node* n)
+    {
+        type = node_type::RETURN;
+        node = n;
+    }
+
+    tree_node* node;
+};
+
 struct identifier_node : public expr_node
 {
     identifier_node(std::string* n)
@@ -152,6 +166,51 @@ struct block_node : public tree_node
     }
 
     statement_list_node* statements;
+};
+
+struct parameter_list_node : public tree_node
+{
+    parameter_list_node()
+    {
+        type = node_type::PARAMETER_LIST;
+    }
+
+    void add(std::string* parameter)
+    {
+        parameters.push_back(parameter);
+    }
+
+    std::vector<std::string*> parameters;
+};
+
+struct function_node : public tree_node
+{
+    function_node(std::string* n, parameter_list_node* p, block_node* b)
+    {
+        type = node_type::BLOCK;
+        name = n;
+        parameters = p;
+        block = b;
+    }
+
+    std::string* name; 
+    parameter_list_node* parameters;
+    block_node* block;
+};
+
+struct calc_program
+{
+    calc_program()
+    {
+
+    }
+
+    void add(function_node* function)
+    {
+        functions.push_back(function);
+    }
+
+    std::vector<function_node*> functions;
 };
 
 double solve_node(tree_node* node);

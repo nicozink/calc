@@ -14,6 +14,14 @@ void c_comp_error(char*);
 	return PRINT;
 }
 
+"function" {
+	return FUNCTION;
+}
+
+"return" {
+	return RETURN;
+}
+
 [0-9]\.?[0-9]* {
 	c_comp_lval.NUM = atof(c_comp_text);
 	return NUM;
@@ -29,7 +37,7 @@ void c_comp_error(char*);
 	return *c_comp_text;
 }
 
-[\t\n] {
+[ \t\n] {
 	/* skip whitespace */
 }
 

@@ -12,7 +12,12 @@ void c_comp_error(char*);
 %token <double> NUM
 %token <char*> IDENTIFIER
 %token PRINT
+%token FUNCTION
+%token RETURN
 
+%type <struct calc_program*> program
+%type <struct function_node*> function
+%type <struct parameter_list_node*> parameter_list
 %type <struct block_node*> block
 %type <struct statement_list_node*> statement_list
 %type <struct statement_node*> statement
@@ -28,14 +33,22 @@ void c_comp_error(char*);
 %%
 
 program:
-	program expr { printf("%.10g\n", solve_node($2)); }
-	| program statement_list { solve_node($2); }
-	|
+	program function { $$->add($2); }
+	| program statement { solve_node($2); }
+	| program expr { printf("%.10g\n", solve_node($2)); }
+	| { $$ = new calc_program(); }
+	;
+
+function:
+	FUNCTION IDENTIFIER '(' parameter_list ')' block { $$ = new function_node(new std::string($2), $4, $6); }
+
+parameter_list:
+	parameter_list IDENTIFIER { $1->add(new std::string($2)); $$ = $1; }
+	| { $$ = new parameter_list_node(); }
 	;
 
 statement_list:
 	statement_list statement { $1->add($2); $$=$1; }
-	| statement_list block { $1->add($2); $$=$1; }
 	| { $$ = new statement_list_node(); }
 	;
 
@@ -45,6 +58,7 @@ block:
 statement:
 	PRINT '(' expr ')' { $$ = new print_node($3); }
 	| IDENTIFIER '=' expr { $$ = new assignment_node(new std::string($1), $3); }
+	| RETURN expr { $$ = new return_node($2); }
 
 expr:
 	NUM { $$ = new num_node($1); }
