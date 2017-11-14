@@ -1,5 +1,21 @@
 #include "calc.h"
 
+std::vector<symbol_table*> symbols;
+
+calc_symbol* find_symbol(std::string name)
+{
+    for (auto it = symbols.rbegin(); it != symbols.rend(); it++)
+    {
+        symbol_table* symbol_table = *it;
+        if (symbol_table->exists(name))
+        {
+            return symbol_table->get(name);
+        }
+    }
+
+    return nullptr;
+}
+
 symbol_table::symbol_table()
 {
     
@@ -44,8 +60,6 @@ calc_symbol* symbol_table::get(std::string name)
         return nullptr;
     }
 }
-
-static symbol_table symbols;
 
 double solve_node(num_node* node);
 double solve_node(binary_operator_node* node);
@@ -99,15 +113,31 @@ double solve_node(assignment_node* node)
     std::string* name = node->left;
     double value = solve_node(node->right);
 
-    if (symbols.exists(*name))
+    calc_symbol* symbol = find_symbol(*name);
+
+    if (symbol != nullptr)
     {
-        calc_symbol* symbol = symbols.get(*name);
         symbol->value = value;
         return value;
     }
     else
     {
-        symbols.add(*name, value);
+        throw "Variable doesn't exist.";
+    }
+}
+
+double solve_node(variable_declaration_node* node)
+{
+    std::string* name = node->left;
+    double value = solve_node(node->right);
+
+    if (symbols[symbols.size() - 1]->exists(*name))
+    {
+        throw "Variable already exists.";
+    }
+    else
+    {
+        symbols[symbols.size() - 1]->add(*name, value);
         return value;
     }
 }
@@ -123,9 +153,9 @@ double solve_node(identifier_node* node)
 {
     std::string* name = node->name;
 
-    if (symbols.exists(*name))
+    calc_symbol* symbol = find_symbol(*name);
+    if (symbol != nullptr)
     {
-        calc_symbol* symbol = symbols.get(*name);
         return symbol->value;
     }
 
@@ -142,7 +172,9 @@ double solve_node(statement_list_node* node)
 
 double solve_node(block_node* node)
 {
+    symbols.push_back(new symbol_table());
     solve_node(node->statements);
+    symbols.pop_back();
 }
 
 double solve_node(tree_node* node)
@@ -161,6 +193,9 @@ double solve_node(tree_node* node)
         case node_type::ASSIGNMENT:
             return solve_node(static_cast<assignment_node*>(node));
 
+        case node_type::VARIABLE_DECLARATION:
+            return solve_node(static_cast<variable_declaration_node*>(node));
+        
         case node_type::PRINT:
             return solve_node(static_cast<print_node*>(node));
         
@@ -173,4 +208,16 @@ double solve_node(tree_node* node)
         case node_type::BLOCK:
             return solve_node(static_cast<block_node*>(node));
     }
+}
+
+double calc_program::run(tree_node* node)
+{
+    solve_node(node);
+}
+
+calc_program* initialise_program()
+{
+    symbols.push_back(new symbol_table());
+
+    return new calc_program();
 }

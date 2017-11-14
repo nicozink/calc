@@ -37,6 +37,7 @@ enum class node_type
     BINARY_OPERATOR,
     UNARY_OPERATOR,
     ASSIGNMENT,
+    VARIABLE_DECLARATION,
     PRINT,
     RETURN,
     IDENTIFIER
@@ -44,7 +45,14 @@ enum class node_type
 
 struct tree_node
 {
+    virtual symbol_table* get_symbol_table()
+    {
+        return parent->get_symbol_table();
+    }
+
     node_type type;
+    
+    tree_node* parent;
 };
 
 struct expr_node : public tree_node
@@ -109,6 +117,19 @@ struct assignment_node : public statement_node
     tree_node* right;
 };
 
+struct variable_declaration_node : public statement_node
+{
+    variable_declaration_node(std::string* l, tree_node* r)
+    {
+        type = node_type::VARIABLE_DECLARATION;
+        left = l;
+        right = r;
+    }
+
+    std::string* left;
+    tree_node* right;
+};
+
 struct print_node : public statement_node
 {
     print_node(tree_node* n)
@@ -157,7 +178,7 @@ struct statement_list_node : public tree_node
     std::vector<tree_node*> statements;
 };
 
-struct block_node : public tree_node
+struct block_node : public statement_node
 {
     block_node(statement_list_node* s)
     {
@@ -198,11 +219,11 @@ struct function_node : public tree_node
     block_node* block;
 };
 
-struct calc_program
+struct calc_program : public tree_node
 {
     calc_program()
     {
-
+        symbols = new symbol_table();
     }
 
     void add(function_node* function)
@@ -210,7 +231,16 @@ struct calc_program
         functions.push_back(function);
     }
 
+    symbol_table* get_symbol_table() override
+    {
+        return symbols;
+    }
+
+    double run(tree_node* node);
+
     std::vector<function_node*> functions;
+
+    symbol_table* symbols;
 };
 
-double solve_node(tree_node* node);
+calc_program* initialise_program();

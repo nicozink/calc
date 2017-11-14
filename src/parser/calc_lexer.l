@@ -22,6 +22,10 @@ void c_comp_error(char*);
 	return RETURN;
 }
 
+"var" {
+	return VAR;
+}
+
 [0-9]\.?[0-9]* {
 	c_comp_lval.NUM = atof(c_comp_text);
 	return NUM;

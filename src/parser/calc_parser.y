@@ -14,6 +14,7 @@ void c_comp_error(char*);
 %token PRINT
 %token FUNCTION
 %token RETURN
+%token VAR
 
 %type <struct calc_program*> program
 %type <struct function_node*> function
@@ -34,9 +35,9 @@ void c_comp_error(char*);
 
 program:
 	program function { $$->add($2); }
-	| program statement { solve_node($2); }
-	| program expr { printf("%.10g\n", solve_node($2)); }
-	| { $$ = new calc_program(); }
+	| program statement { $1->run($2); }
+	| program expr { printf("%.10g\n", $1->run($2)); }
+	| { $$ = initialise_program(); }
 	;
 
 function:
@@ -57,8 +58,10 @@ block:
 
 statement:
 	PRINT '(' expr ')' { $$ = new print_node($3); }
+	| VAR IDENTIFIER '=' expr { $$ = new variable_declaration_node(new std::string($2), $4); }
 	| IDENTIFIER '=' expr { $$ = new assignment_node(new std::string($1), $3); }
 	| RETURN expr { $$ = new return_node($2); }
+	| block { $$ = $1; }
 
 expr:
 	NUM { $$ = new num_node($1); }
