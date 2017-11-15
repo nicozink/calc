@@ -2,6 +2,8 @@
 
 std::vector<symbol_table*> symbols;
 
+std::map<std::string, function_node*> functions;
+
 calc_symbol* find_symbol(std::string name)
 {
     for (auto it = symbols.rbegin(); it != symbols.rend(); it++)
@@ -95,7 +97,7 @@ double solve_node(binary_operator_node* node)
         return left / right;
     }
 
-    throw "Should not be here.";
+    throw "Unknown symbol for binary operator.";
 }
 
 double solve_node(unary_operator_node* node)
@@ -105,7 +107,7 @@ double solve_node(unary_operator_node* node)
         return -solve_node(node->expr);
     }
 
-    throw "Should not be here.";
+    throw "Unknown symbol for unary operator.";
 }
 
 double solve_node(assignment_node* node)
@@ -124,6 +126,11 @@ double solve_node(assignment_node* node)
     {
         throw "Variable doesn't exist.";
     }
+}
+
+double solve_node(expression_statement_node* node)
+{
+    solve_node(node->node);
 }
 
 double solve_node(variable_declaration_node* node)
@@ -149,6 +156,11 @@ double solve_node(print_node* node)
     printf("%.10g\n", value);
 }
 
+double solve_node(return_node* node)
+{
+    solve_node(node->node);
+}
+
 double solve_node(identifier_node* node)
 {
     std::string* name = node->name;
@@ -159,7 +171,24 @@ double solve_node(identifier_node* node)
         return symbol->value;
     }
 
-    throw "Should not be here.";
+    throw "Unknown identifier.";
+}
+
+double solve_node(function_call_node* node)
+{
+    std::string* name = node->name;
+
+    auto it = functions.find(*name);
+    if (it != functions.end())
+    {
+        function_node* function_node = it->second;
+
+        solve_node(function_node->block);
+    }
+    else
+    {
+        throw "Unknown function.";
+    }
 }
 
 double solve_node(statement_list_node* node)
@@ -193,11 +222,20 @@ double solve_node(tree_node* node)
         case node_type::ASSIGNMENT:
             return solve_node(static_cast<assignment_node*>(node));
 
+        case node_type::EXPRESSION_STATEMENT:
+            return solve_node(static_cast<expression_statement_node*>(node));
+        
         case node_type::VARIABLE_DECLARATION:
             return solve_node(static_cast<variable_declaration_node*>(node));
         
         case node_type::PRINT:
             return solve_node(static_cast<print_node*>(node));
+        
+        case node_type::RETURN:
+            return solve_node(static_cast<return_node*>(node));
+        
+        case node_type::FUNCTION_CALL:
+            return solve_node(static_cast<function_call_node*>(node));
         
         case node_type::IDENTIFIER:
             return solve_node(static_cast<identifier_node*>(node));
@@ -208,6 +246,15 @@ double solve_node(tree_node* node)
         case node_type::BLOCK:
             return solve_node(static_cast<block_node*>(node));
     }
+
+    throw "Unknown token type.";
+}
+
+void calc_program::add(function_node* function)
+{
+    std::string name = *(function->name);
+
+    functions.insert(std::pair<std::string, function_node*>(name, function));
 }
 
 double calc_program::run(tree_node* node)

@@ -30,6 +30,7 @@ private:
 enum class node_type
 {
     FUNCTION,
+    FUNCTION_CALL,
     PARAMETER_LIST,
     BLOCK,
     STATEMENT_LIST,
@@ -37,6 +38,7 @@ enum class node_type
     BINARY_OPERATOR,
     UNARY_OPERATOR,
     ASSIGNMENT,
+    EXPRESSION_STATEMENT,
     VARIABLE_DECLARATION,
     PRINT,
     RETURN,
@@ -152,6 +154,28 @@ struct return_node : public statement_node
     tree_node* node;
 };
 
+struct expression_statement_node : public statement_node
+{
+    expression_statement_node(tree_node* n)
+    {
+        type = node_type::EXPRESSION_STATEMENT;
+        node = n;
+    }
+
+    tree_node* node;
+};
+
+struct function_call_node : public expr_node
+{
+    function_call_node(std::string* n)
+    {
+        type = node_type::FUNCTION_CALL;
+        name = n;
+    }
+
+    std::string* name;
+};
+
 struct identifier_node : public expr_node
 {
     identifier_node(std::string* n)
@@ -208,7 +232,7 @@ struct function_node : public tree_node
 {
     function_node(std::string* n, parameter_list_node* p, block_node* b)
     {
-        type = node_type::BLOCK;
+        type = node_type::FUNCTION;
         name = n;
         parameters = p;
         block = b;
@@ -219,26 +243,16 @@ struct function_node : public tree_node
     block_node* block;
 };
 
-struct calc_program : public tree_node
+struct calc_program
 {
     calc_program()
     {
         symbols = new symbol_table();
     }
 
-    void add(function_node* function)
-    {
-        functions.push_back(function);
-    }
-
-    symbol_table* get_symbol_table() override
-    {
-        return symbols;
-    }
+    void add(function_node* function);
 
     double run(tree_node* node);
-
-    std::vector<function_node*> functions;
 
     symbol_table* symbols;
 };

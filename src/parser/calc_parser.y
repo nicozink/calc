@@ -36,7 +36,6 @@ void c_comp_error(char*);
 program:
 	program function { $$->add($2); }
 	| program statement { $1->run($2); }
-	| program expr { printf("%.10g\n", $1->run($2)); }
 	| { $$ = initialise_program(); }
 	;
 
@@ -62,10 +61,12 @@ statement:
 	| IDENTIFIER '=' expr { $$ = new assignment_node(new std::string($1), $3); }
 	| RETURN expr { $$ = new return_node($2); }
 	| block { $$ = $1; }
+	| expr { $$ = new expression_statement_node($1); }
 
 expr:
 	NUM { $$ = new num_node($1); }
 	| IDENTIFIER { $$ = new identifier_node(new std::string($1)); }
+	| IDENTIFIER '(' ')' { $$ = new function_call_node(new std::string($1)); }
 	| expr '+' expr { $$ = new binary_operator_node('+', $1, $3); }
 	| expr '-' expr { $$ = new binary_operator_node('-', $1, $3); }
 	| expr '*' expr { $$ = new binary_operator_node('*', $1, $3);; }
