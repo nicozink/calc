@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string>
 #include "calc.h"
+#include "interpreter.h"
 int c_comp_lex(void);
 void c_comp_error(char*);
 %}
@@ -16,7 +17,7 @@ void c_comp_error(char*);
 %token RETURN
 %token VAR
 
-%type <struct calc_program*> program
+%type <struct translation_unit*> translation_unit
 %type <struct function_node*> function
 %type <struct parameter_list_node*> parameter_list
 %type <struct block_node*> block
@@ -34,9 +35,11 @@ void c_comp_error(char*);
 %%
 
 program:
-	program function { $$->add($2); }
-	| program statement { $1->run($2); }
-	| { $$ = initialise_program(); }
+	translation_unit { interpret($1); }
+
+translation_unit:
+	translation_unit function { $$->add($2); }
+	| { $$ = new translation_unit(); }
 	;
 
 function:

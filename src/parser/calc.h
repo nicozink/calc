@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <map>
 #include <vector>
@@ -243,18 +245,14 @@ struct function_node : public tree_node
     block_node* block;
 };
 
-struct calc_program
+struct translation_unit
 {
-    calc_program()
+    translation_unit()
     {
-        symbols = new symbol_table();
+        
     }
 
     void add(function_node* function);
 
-    double run(tree_node* node);
-
-    symbol_table* symbols;
+    std::map<std::string, function_node*> functions;
 };
-
-calc_program* initialise_program();
