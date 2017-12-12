@@ -41,7 +41,7 @@ void c_comp_error(char*);
 	return *c_comp_text;
 }
 
-[ \t\n] {
+[ \t\n\r] {
 	/* skip whitespace */
 }
 
