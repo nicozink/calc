@@ -136,13 +136,13 @@ struct variable_declaration_node : public statement_node
 
 struct print_node : public statement_node
 {
-    print_node(tree_node* n)
+    print_node(expr_node* e)
     {
         type = node_type::PRINT;
-        node = n;
+        expr = e;
     }
 
-    tree_node* node;
+    expr_node* expr;
 };
 
 struct return_node : public statement_node
@@ -196,12 +196,12 @@ struct statement_list_node : public tree_node
         type = node_type::STATEMENT_LIST;
     }
 
-    void add(tree_node* statement)
+    void add(statement_node* statement)
     {
         statements.push_back(statement);
     }
 
-    std::vector<tree_node*> statements;
+    std::vector<statement_node*> statements;
 };
 
 struct block_node : public statement_node
