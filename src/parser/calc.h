@@ -158,13 +158,13 @@ struct return_node : public statement_node
 
 struct expression_statement_node : public statement_node
 {
-    expression_statement_node(tree_node* n)
+    expression_statement_node(expr_node* e)
     {
         type = node_type::EXPRESSION_STATEMENT;
-        node = n;
+        expr = e;
     }
 
-    tree_node* node;
+    expr_node* expr;
 };
 
 struct function_call_node : public expr_node

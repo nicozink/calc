@@ -1,4 +1,12 @@
+function hello()
+{
+    print(3)
+    print(4.5)
+}
+
 function main()
 {
+    hello()
+    
     print(2)
 }

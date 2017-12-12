@@ -37,6 +37,15 @@ llvm::Value* process_unary_operator(unary_operator_node& node, llvm::LLVMContext
 
 llvm::Value* process_function_call(function_call_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
+    llvm::FunctionType *function_type = llvm::TypeBuilder<void(), false>::get(context);
+
+    llvm::Constant* function = module->getOrInsertFunction(*node.name, function_type, llvm::AttributeSet().addAttribute(module->getContext(), 1U, llvm::Attribute::NoAlias));
+
+    std::vector<llvm::Value*> printArgs;
+    llvm::ArrayRef<llvm::Value*>  argsRef(printArgs);
+
+    builder.CreateCall(function, argsRef);
+
     return nullptr;
 }
 
@@ -89,7 +98,7 @@ void process_print(print_node& node, llvm::LLVMContext &context, llvm::IRBuilder
     std::vector<llvm::Value*> printArgs;
     printArgs.push_back(builder.CreateGlobalStringPtr("out: %f\n"));
     printArgs.push_back(expr);
-    llvm::ArrayRef<llvm::Value*>  argsRef(printArgs);
+    llvm::ArrayRef<llvm::Value*> argsRef(printArgs);
 
     builder.CreateCall(printf_func, argsRef);
 }
@@ -101,7 +110,7 @@ void process_return(return_node& node, llvm::LLVMContext &context, llvm::IRBuild
 
 void process_expression_statement(expression_statement_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
-    
+    process_expr(*node.expr, context, builder, module);
 }
 
 void process_statement(statement_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
