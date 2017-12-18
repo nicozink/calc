@@ -77,7 +77,7 @@ struct num_node : public expr_node
 
 struct binary_operator_node : public expr_node
 {
-    binary_operator_node(char s, tree_node* l, tree_node* r)
+    binary_operator_node(char s, expr_node* l, expr_node* r)
     {
         type = node_type::BINARY_OPERATOR;
         symbol = s;
@@ -86,8 +86,8 @@ struct binary_operator_node : public expr_node
     }
 
     char symbol;
-    tree_node* left;
-    tree_node* right;
+    expr_node* left;
+    expr_node* right;
 };
 
 struct unary_operator_node : public expr_node

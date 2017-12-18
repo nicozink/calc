@@ -18,6 +18,8 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/raw_ostream.h>
 
+llvm::Value* process_expr(expr_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module);
+
 llvm::Value* process_num(num_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
     llvm::Value* constValue = llvm::ConstantFP::get(context, llvm::APFloat(node.value));
@@ -27,7 +29,33 @@ llvm::Value* process_num(num_node& node, llvm::LLVMContext &context, llvm::IRBui
 
 llvm::Value* process_binary_operator(binary_operator_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
-    return nullptr;
+    llvm::Value* left = process_expr(*node.left, context, builder, module);
+    llvm::Value* right = process_expr(*node.right, context, builder, module);
+
+    llvm::Value* result;
+
+    if (node.symbol == '+')
+    {
+        result = builder.CreateFAdd(left, right);
+    }
+    else if (node.symbol == '-')
+    {
+        result = builder.CreateFSub(left, right, "tmp");
+    }
+    else if (node.symbol == '*')
+    {
+        result = builder.CreateFMul(left, right);
+    }
+    else if (node.symbol == '/')
+    {
+        result = builder.CreateFDiv(left, right);
+    }
+    else
+    {
+        throw "Unknown symbol for binary operator.";
+    }
+
+    return result;
 }
 
 llvm::Value* process_unary_operator(unary_operator_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
