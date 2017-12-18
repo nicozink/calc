@@ -92,7 +92,7 @@ struct binary_operator_node : public expr_node
 
 struct unary_operator_node : public expr_node
 {
-    unary_operator_node(char s, tree_node* e)
+    unary_operator_node(char s, expr_node* e)
     {
         type = node_type::UNARY_OPERATOR;
         symbol = s;
@@ -100,7 +100,7 @@ struct unary_operator_node : public expr_node
     }
 
     char symbol;
-    tree_node* expr;
+    expr_node* expr;
 };
 
 struct statement_node : public tree_node

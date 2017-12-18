@@ -60,7 +60,20 @@ llvm::Value* process_binary_operator(binary_operator_node& node, llvm::LLVMConte
 
 llvm::Value* process_unary_operator(unary_operator_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
-    return nullptr;
+    llvm::Value* value = process_expr(*node.expr, context, builder, module);
+
+    llvm::Value* result;
+
+    if (node.symbol == '-')
+    {
+        result = builder.CreateFNeg(value);
+    }
+    else
+    {
+        throw "Unknown symbol for binary operator.";
+    }
+
+    return result;
 }
 
 llvm::Value* process_function_call(function_call_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
