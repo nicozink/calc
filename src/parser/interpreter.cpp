@@ -18,6 +18,94 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/raw_ostream.h>
 
+struct calc_symbol
+{
+    std::string name;
+    llvm::AllocaInst* value;
+};
+
+class symbol_table
+{
+public:
+
+    symbol_table();
+
+    calc_symbol* add(std::string name, llvm::AllocaInst* value);
+
+    void clear();
+
+    bool exists(std::string name);
+
+    calc_symbol* get(std::string name);
+
+private:
+
+    std::map<std::string, calc_symbol*> symbols;
+};
+
+std::vector<symbol_table*> symbols;
+
+std::map<std::string, function_node*> functions;
+
+calc_symbol* find_symbol(std::string name)
+{
+    for (auto it = symbols.rbegin(); it != symbols.rend(); it++)
+    {
+        symbol_table* symbol_table = *it;
+        if (symbol_table->exists(name))
+        {
+            return symbol_table->get(name);
+        }
+    }
+
+    return nullptr;
+}
+
+symbol_table::symbol_table()
+{
+    
+}
+
+calc_symbol* symbol_table::add(std::string name, llvm::AllocaInst* value)
+{
+    calc_symbol* symbol = new calc_symbol();
+    symbol->name = name;
+    symbol->value = value;
+
+    symbols.insert(std::pair<std::string, calc_symbol*>(name, symbol));
+
+    return symbol;
+}
+
+void symbol_table::clear()
+{
+    for (auto symbol : symbols)
+    {
+        delete symbol.second;
+    }
+
+    symbols.clear();
+}
+
+bool symbol_table::exists(std::string name)
+{
+    auto it = symbols.find(name);
+    return (it != symbols.end());
+}
+
+calc_symbol* symbol_table::get(std::string name)
+{
+    auto it = symbols.find(name);
+    if (it != symbols.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
 llvm::Value* process_expr(expr_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module);
 
 llvm::Value* process_num(num_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
@@ -92,7 +180,16 @@ llvm::Value* process_function_call(function_call_node& node, llvm::LLVMContext &
 
 llvm::Value* process_identifier(identifier_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
-    return nullptr;
+    std::string* name = node.name;
+
+    calc_symbol* symbol = find_symbol(*name);
+    if (symbol != nullptr)
+    {
+        llvm::AllocaInst* alloca = symbol->value;
+        return builder.CreateLoad(alloca);
+    }
+
+    throw "Unknown identifier.";
 }
 
 llvm::Value* process_expr(expr_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
@@ -125,7 +222,20 @@ void process_assignment(assignment_node& node, llvm::LLVMContext &context, llvm:
 
 void process_variable_declaration(variable_declaration_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
+    std::string* name = node.name;
 
+    if (symbols[symbols.size() - 1]->exists(*name))
+    {
+        throw "Variable already exists.";
+    }
+
+    llvm::AllocaInst* alloca = builder.CreateAlloca(llvm::Type::getDoubleTy(context), 0, node.name->c_str());
+
+    llvm::Value* value = process_expr(*node.expr, context, builder, module);
+
+    builder.CreateStore(value, alloca);
+
+    symbols[symbols.size() - 1]->add(*name, alloca);
 }
 
 void process_print(print_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
@@ -200,11 +310,15 @@ void process_block(block_node& block, llvm::Function *mainFunc, llvm::LLVMContex
 
 void process_function(function_node& function, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
+    symbols.push_back(new symbol_table());
+
     llvm::FunctionType *funcType = llvm::FunctionType::get(builder.getVoidTy(), false);
     llvm::Function *mainFunc = 
       llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, function.name->c_str(), &*module);
     
     process_block(*function.block, mainFunc, context, builder, module);
+
+    symbols.pop_back();
 }
 
 void interpret(translation_unit* unit)

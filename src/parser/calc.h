@@ -4,31 +4,6 @@
 #include <map>
 #include <vector>
 
-struct calc_symbol
-{
-    std::string name;
-    double value;
-};
-
-class symbol_table
-{
-public:
-
-    symbol_table();
-
-    calc_symbol* add(std::string name, double value);
-
-    void clear();
-
-    bool exists(std::string name);
-
-    calc_symbol* get(std::string name);
-
-private:
-
-    std::map<std::string, calc_symbol*> symbols;
-};
-
 enum class node_type
 {
     FUNCTION,
@@ -49,14 +24,7 @@ enum class node_type
 
 struct tree_node
 {
-    virtual symbol_table* get_symbol_table()
-    {
-        return parent->get_symbol_table();
-    }
-
     node_type type;
-    
-    tree_node* parent;
 };
 
 struct expr_node : public tree_node
@@ -123,15 +91,15 @@ struct assignment_node : public statement_node
 
 struct variable_declaration_node : public statement_node
 {
-    variable_declaration_node(std::string* l, tree_node* r)
+    variable_declaration_node(std::string* n, expr_node* e)
     {
         type = node_type::VARIABLE_DECLARATION;
-        left = l;
-        right = r;
+        name = n;
+        expr = e;
     }
 
-    std::string* left;
-    tree_node* right;
+    std::string* name;
+    expr_node* expr;
 };
 
 struct print_node : public statement_node
