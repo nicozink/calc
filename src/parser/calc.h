@@ -78,15 +78,15 @@ struct statement_node : public tree_node
 
 struct assignment_node : public statement_node
 {
-    assignment_node(std::string* l, tree_node* r)
+    assignment_node(std::string* n, expr_node* e)
     {
         type = node_type::ASSIGNMENT;
-        left = l;
-        right = r;
+        name = n;
+        expr = e;
     }
 
-    std::string* left;
-    tree_node* right;
+    std::string* name;
+    expr_node* expr;
 };
 
 struct variable_declaration_node : public statement_node

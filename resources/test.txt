@@ -10,7 +10,11 @@ function main()
     
     var x = 3
 
-    print(x)
+    print(x+4)
+
+    x = 7
+
+    print(x+4)
 
     print(-2/5)
 }

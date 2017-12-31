@@ -217,7 +217,21 @@ llvm::Value* process_expr(expr_node& node, llvm::LLVMContext &context, llvm::IRB
 
 void process_assignment(assignment_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
+    std::string* name = node.name;
 
+    calc_symbol* symbol = find_symbol(*name);
+    if (symbol != nullptr)
+    {
+        llvm::AllocaInst* alloca = symbol->value;
+        
+        llvm::Value* value = process_expr(*node.expr, context, builder, module);
+
+        builder.CreateStore(value, alloca);
+
+        return;
+    }
+
+    throw "Unknown identifier.";
 }
 
 void process_variable_declaration(variable_declaration_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
