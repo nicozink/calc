@@ -278,27 +278,44 @@ void process_expression_statement(expression_statement_node& node, llvm::LLVMCon
     process_expr(*node.expr, context, builder, module);
 }
 
+void process_statement_list(statement_list_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module);
+
+void process_block(block_node& block, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
+{
+    symbols.push_back(new symbol_table());
+
+    process_statement_list(*block.statements, context, builder, module);
+
+    symbols.pop_back();
+}
+
 void process_statement(statement_node& node, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
     switch (node.type)
     {
         case node_type::ASSIGNMENT:
-            return process_assignment(static_cast<assignment_node&>(node), context, builder, module);
+            process_assignment(static_cast<assignment_node&>(node), context, builder, module);
+            return;
 
         case node_type::EXPRESSION_STATEMENT:
-            return process_expression_statement(static_cast<expression_statement_node&>(node), context, builder, module);
+            process_expression_statement(static_cast<expression_statement_node&>(node), context, builder, module);
+            return;
         
         case node_type::VARIABLE_DECLARATION:
-            return process_variable_declaration(static_cast<variable_declaration_node&>(node), context, builder, module);
+            process_variable_declaration(static_cast<variable_declaration_node&>(node), context, builder, module);
+            return;
         
         case node_type::PRINT:
-            return process_print(static_cast<print_node&>(node), context, builder, module);
+            process_print(static_cast<print_node&>(node), context, builder, module);
+            return;
         
         case node_type::RETURN:
-            return process_return(static_cast<return_node&>(node), context, builder, module);
+            process_return(static_cast<return_node&>(node), context, builder, module);
+            return;
         
-        //case node_type::BLOCK:
-        //    return solve_node(static_cast<block_node*>(node));
+        case node_type::BLOCK:
+            process_block(static_cast<block_node&>(node), context, builder, module);
+            return;
     }
 
     throw "Unknown token type.";
@@ -312,7 +329,7 @@ void process_statement_list(statement_list_node& node, llvm::LLVMContext &contex
     }
 }
 
-void process_block(block_node& block, llvm::Function *mainFunc, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
+void process_function_block(block_node& block, llvm::Function *mainFunc, llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module* module)
 {
     llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "entrypoint", mainFunc);
     builder.SetInsertPoint(entry);
@@ -330,7 +347,7 @@ void process_function(function_node& function, llvm::LLVMContext &context, llvm:
     llvm::Function *mainFunc = 
       llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, function.name->c_str(), &*module);
     
-    process_block(*function.block, mainFunc, context, builder, module);
+    process_function_block(*function.block, mainFunc, context, builder, module);
 
     symbols.pop_back();
 }
