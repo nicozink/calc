@@ -22,7 +22,7 @@ set(SRC_PARSER
 	${FLEX_calc_flex_OUTPUTS}
 	${BISON_calc_bison_OUTPUTS}
 	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/interpreter.cpp)
+	${CMAKE_CURRENT_SOURCE_DIR}/src/interpreter/interpreter.cpp)
 
 add_library(calc_parser ${SRC_PARSER})
 

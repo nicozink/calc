@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string>
 #include "calc.h"
-#include "interpreter.h"
+#include "interpreter/interpreter.h"
 int c_comp_lex(void);
 void c_comp_error(char*);
 %}
