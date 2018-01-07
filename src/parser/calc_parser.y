@@ -35,7 +35,11 @@ void c_comp_error(char*);
 %%
 
 program:
-	translation_unit { interpret($1); }
+	translation_unit {
+		Interpreter interp;
+		interp.add($1);
+		interp.execute();
+	}
 
 translation_unit:
 	translation_unit function { $$->add($2); }
