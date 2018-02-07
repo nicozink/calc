@@ -404,7 +404,7 @@ void Interpreter::impl::process_function(function_node& function, llvm::Module* 
 
 	llvm::FunctionType *funcType = llvm::FunctionType::get(builder.getVoidTy(), false);
 	llvm::Function *mainFunc = 
-	  llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, function.name->c_str(), &*module);
+	  llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, function.name.c_str(), &*module);
 
 	process_function_block(*function.block, mainFunc, module);
 

@@ -2,26 +2,16 @@ cmake_minimum_required(VERSION 3.5)
 
 project(calc_test)
 
-#add_custom_target(calc_parser_custom)
-
-find_package(FLEX)
-
-FLEX_TARGET(calc_flex
-	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc_lexer.l
-	${CMAKE_CURRENT_BINARY_DIR}/calc_lexer.cpp)
-
 find_package(BISON)
 
 BISON_TARGET(calc_bison
 	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc_parser.y
 	${CMAKE_CURRENT_BINARY_DIR}/calc_parser.cpp)
 
-ADD_FLEX_BISON_DEPENDENCY(calc_flex calc_bison)
-
 set(SRC_PARSER
-	${FLEX_calc_flex_OUTPUTS}
 	${BISON_calc_bison_OUTPUTS}
 	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc_lexer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/interpreter/interpreter.cpp)
 
 add_library(calc_parser ${SRC_PARSER})
@@ -33,7 +23,8 @@ target_include_directories(calc_parser
 
 target_compile_features(calc_parser
 	PRIVATE
-	cxx_auto_type)
+	cxx_auto_type
+	cxx_strong_enums)
 
 set(SRC_MAIN
 	${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
@@ -52,6 +43,11 @@ target_link_libraries(llvm_backend
 add_executable(calc_test ${SRC_MAIN})
 
 target_include_directories(calc_test
-	PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(calc_test calc_parser llvm_backend)
+
+target_compile_features(calc_test
+	PRIVATE
+	cxx_strong_enums)

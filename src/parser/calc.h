@@ -200,7 +200,7 @@ struct parameter_list_node : public tree_node
 
 struct function_node : public tree_node
 {
-    function_node(std::string* n, parameter_list_node* p, block_node* b)
+    function_node(std::string n, parameter_list_node* p, block_node* b)
     {
         type = node_type::FUNCTION;
         name = n;
@@ -208,7 +208,7 @@ struct function_node : public tree_node
         block = b;
     }
 
-    std::string* name; 
+    std::string name; 
     parameter_list_node* parameters;
     block_node* block;
 };

@@ -1,21 +1,45 @@
-%{
+%language "c++"
+%defines
+%define api.prefix c_comp
+%define api.token.constructor
+%define api.value.type variant
+%define parse.assert
+
+%code requires
+{
+#include "parser/calc.h"
+
+// Not sure why this is needed
+#define YY_NULLPTR nullptr
+}
+
+%code
+{
 #include <stdio.h>
+#include <iostream>
 #include <string>
-#include "calc.h"
+#include "calc_lexer.h"
 #include "interpreter/interpreter.h"
-int c_comp_lex(void);
 void c_comp_error(char*);
-%}
+static c_comp::parser::symbol_type c_complex ();
+}
 
-%define api.prefix c_comp_
-
-%define api.value.type union
 %token <double> NUM
-%token <char*> IDENTIFIER
+%token <std::string> IDENTIFIER
 %token PRINT
 %token FUNCTION
 %token RETURN
 %token VAR
+%token ROUND_BRACKET_OPEN
+%token ROUND_BRACKET_CLOSE
+%token CURLY_BRACKET_OPEN
+%token CURLY_BRACKET_CLOSE
+%token EQUALS
+%token PLUS
+%token MINUS
+%token MULTIPLY
+%token DIVIDE
+%token END_OF_FILE
 
 %type <struct translation_unit*> translation_unit
 %type <struct function_node*> function
@@ -35,19 +59,20 @@ void c_comp_error(char*);
 %%
 
 program:
-	translation_unit {
+	translation_unit END_OF_FILE {
 		Interpreter interp;
 		interp.add($1);
 		interp.execute();
+		YYACCEPT;
 	}
 
 translation_unit:
-	translation_unit function { $$->add($2); }
+	translation_unit function { $1->add($2); $$=$1; }
 	| { $$ = new translation_unit(); }
 	;
 
 function:
-	FUNCTION IDENTIFIER '(' parameter_list ')' block { $$ = new function_node(new std::string($2), $4, $6); }
+	FUNCTION IDENTIFIER ROUND_BRACKET_OPEN parameter_list ROUND_BRACKET_CLOSE block { $$ = new function_node($2, $4, $6); }
 
 parameter_list:
 	parameter_list IDENTIFIER { $1->add(new std::string($2)); $$ = $1; }
@@ -60,12 +85,12 @@ statement_list:
 	;
 
 block:
-	'{' statement_list '}' { $$ = new block_node($2); }
+	CURLY_BRACKET_OPEN statement_list CURLY_BRACKET_CLOSE { $$ = new block_node($2); }
 
 statement:
-	PRINT '(' expr ')' { $$ = new print_node($3); }
-	| VAR IDENTIFIER '=' expr { $$ = new variable_declaration_node(new std::string($2), $4); }
-	| IDENTIFIER '=' expr { $$ = new assignment_node(new std::string($1), $3); }
+	PRINT ROUND_BRACKET_OPEN expr ROUND_BRACKET_CLOSE { $$ = new print_node($3); }
+	| VAR IDENTIFIER EQUALS expr { $$ = new variable_declaration_node(new std::string($2), $4); }
+	| IDENTIFIER EQUALS expr { $$ = new assignment_node(new std::string($1), $3); }
 	| RETURN expr { $$ = new return_node($2); }
 	| block { $$ = $1; }
 	| expr { $$ = new expression_statement_node($1); }
@@ -73,19 +98,97 @@ statement:
 expr:
 	NUM { $$ = new num_node($1); }
 	| IDENTIFIER { $$ = new identifier_node(new std::string($1)); }
-	| IDENTIFIER '(' ')' { $$ = new function_call_node(new std::string($1)); }
-	| expr '+' expr { $$ = new binary_operator_node('+', $1, $3); }
-	| expr '-' expr { $$ = new binary_operator_node('-', $1, $3); }
-	| expr '*' expr { $$ = new binary_operator_node('*', $1, $3);; }
-	| expr '/' expr { $$ = new binary_operator_node('/', $1, $3); }
-	| '-' expr %prec NEG { $$ = new unary_operator_node('-', $2); }
-	| '(' expr ')' { $$ = $2; }
+	| IDENTIFIER ROUND_BRACKET_OPEN ROUND_BRACKET_CLOSE { $$ = new function_call_node(new std::string($1)); }
+	| expr PLUS expr { $$ = new binary_operator_node('+', $1, $3); }
+	| expr MINUS expr { $$ = new binary_operator_node('-', $1, $3); }
+	| expr MULTIPLY expr { $$ = new binary_operator_node('*', $1, $3);; }
+	| expr DIVIDE expr { $$ = new binary_operator_node('/', $1, $3); }
+	| MINUS expr %prec NEG { $$ = new unary_operator_node('-', $2); }
+	| ROUND_BRACKET_OPEN expr ROUND_BRACKET_CLOSE { $$ = $2; }
 	;
 
 %%
 
-void c_comp_error(char* s)
+CalcLexer* calc_lexer;
+
+void c_comp::parser::error(const std::string& msg)
 {
-	fprintf(stderr, "%s\n", s);
+	std::cerr << msg << std::endl;
 }
 
+static c_comp::parser::symbol_type c_complex()
+{
+	auto token = calc_lexer->read_next();
+
+	std::cout << "Token: " << calc_lexer->get_string() << std::endl;
+
+	switch (token)
+	{
+		case CalcToken::id_print:
+		{
+			return c_comp::parser::make_PRINT();
+		}
+		case CalcToken::id_function:
+		{
+			return c_comp::parser::make_FUNCTION();
+		}
+		case CalcToken::id_return:
+		{
+			return c_comp::parser::make_RETURN();
+		}
+		case CalcToken::id_var:
+		{
+			return c_comp::parser::make_VAR();
+		}
+		case CalcToken::number:
+		{
+			return c_comp::parser::make_NUM(calc_lexer->get_number());
+		}
+		case CalcToken::identifier:
+		{
+			return c_comp::parser::make_IDENTIFIER(calc_lexer->get_string().c_str());
+		}
+		case CalcToken::round_bracket_open:
+		{
+			return c_comp::parser::make_ROUND_BRACKET_OPEN();
+		}
+		case CalcToken::round_bracket_close:
+		{
+			return c_comp::parser::make_ROUND_BRACKET_CLOSE();
+		}
+		case CalcToken::curly_bracket_open:
+		{
+			return c_comp::parser::make_CURLY_BRACKET_OPEN();
+		}
+		case CalcToken::curly_bracket_close:
+		{
+			return c_comp::parser::make_CURLY_BRACKET_CLOSE();
+		}
+		case CalcToken::equals:
+		{
+			return c_comp::parser::make_EQUALS();
+		}
+		case CalcToken::plus:
+		{
+			return c_comp::parser::make_PLUS();
+		}
+		case CalcToken::minus:
+		{
+			return c_comp::parser::make_MINUS();
+		}
+		case CalcToken::multiply:
+		{
+			return c_comp::parser::make_MULTIPLY();
+		}
+		case CalcToken::divide:
+		{
+			return c_comp::parser::make_DIVIDE();
+		}
+		case CalcToken::end_of_input:
+		{
+			return c_comp::parser::make_END_OF_FILE();
+		}
+	}
+
+	throw "Unknown token.";
+}

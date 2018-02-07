@@ -1,9 +1,10 @@
 #include <fstream>
 #include <iostream>
 
+#include "parser/calc_lexer.h"
 #include <calc_parser.hpp>
 
-extern "C" FILE *c_comp_in;
+extern CalcLexer* calc_lexer;
 
 int main(int argc, char** argv)
 {
@@ -11,25 +12,18 @@ int main(int argc, char** argv)
 	{
 		if (argc > 1)
 		{
-			std::string param(argv[1]);
+			std::string path(argv[1]);
+			std::ifstream file(path.c_str());
 
-			FILE* input = fopen(param.c_str(), "r");
-			if (!input)
-			{
-			std::cout << "Could not open file to parse." << std::endl; 
-			return -1;
-			} 
-		
-			c_comp_in = input;
+			CalcLexer cl(file);
+			calc_lexer = &cl;
 
-			do 
-			{
-				c_comp_parse();
-			} while (!feof(c_comp_in));
+			c_comp::parser p;
+			p.parse ();
 		}
 		else
 		{
-			c_comp_parse();
+			throw "argument expected.";
 		}
 	}
 	catch (char const* message)
