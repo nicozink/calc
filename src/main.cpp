@@ -4,8 +4,6 @@
 #include "parser/calc_lexer.h"
 #include <calc_parser.hpp>
 
-extern CalcLexer* calc_lexer;
-
 int main(int argc, char** argv)
 {
 	try
@@ -16,9 +14,7 @@ int main(int argc, char** argv)
 			std::ifstream file(path.c_str());
 
 			CalcLexer cl(file);
-			calc_lexer = &cl;
-
-			c_comp::parser p;
+			CalcParser::parser p(cl);
 			p.parse ();
 		}
 		else

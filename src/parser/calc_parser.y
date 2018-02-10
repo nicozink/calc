@@ -1,6 +1,6 @@
 %language "c++"
 %defines
-%define api.prefix c_comp
+%define api.prefix CalcParser
 %define api.token.constructor
 %define api.value.type variant
 %define parse.assert
@@ -8,6 +8,7 @@
 %code requires
 {
 #include "parser/calc.h"
+#include "parser/calc_lexer.h"
 
 // Not sure why this is needed
 #define YY_NULLPTR nullptr
@@ -20,9 +21,12 @@
 #include <string>
 #include "calc_lexer.h"
 #include "interpreter/interpreter.h"
-void c_comp_error(char*);
-static c_comp::parser::symbol_type c_complex ();
+void CalcParser_error(char*);
+static CalcParser::parser::symbol_type CalcParserlex (CalcLexer& calc_lexer);
 }
+
+%parse-param {CalcLexer& calc_lexer}
+%lex-param {CalcLexer& calc_lexer}
 
 %token <double> NUM
 %token <std::string> IDENTIFIER
@@ -109,84 +113,82 @@ expr:
 
 %%
 
-CalcLexer* calc_lexer;
-
-void c_comp::parser::error(const std::string& msg)
+void CalcParser::parser::error(const std::string& msg)
 {
 	std::cerr << msg << std::endl;
 }
 
-static c_comp::parser::symbol_type c_complex()
+static CalcParser::parser::symbol_type CalcParserlex(CalcLexer& calc_lexer)
 {
-	auto token = calc_lexer->read_next();
+	auto token = calc_lexer.read_next();
 
-	std::cout << "Token: " << calc_lexer->get_string() << std::endl;
+	std::cout << "Token: " << calc_lexer.get_string() << std::endl;
 
 	switch (token)
 	{
 		case CalcToken::id_print:
 		{
-			return c_comp::parser::make_PRINT();
+			return CalcParser::parser::make_PRINT();
 		}
 		case CalcToken::id_function:
 		{
-			return c_comp::parser::make_FUNCTION();
+			return CalcParser::parser::make_FUNCTION();
 		}
 		case CalcToken::id_return:
 		{
-			return c_comp::parser::make_RETURN();
+			return CalcParser::parser::make_RETURN();
 		}
 		case CalcToken::id_var:
 		{
-			return c_comp::parser::make_VAR();
+			return CalcParser::parser::make_VAR();
 		}
 		case CalcToken::number:
 		{
-			return c_comp::parser::make_NUM(calc_lexer->get_number());
+			return CalcParser::parser::make_NUM(calc_lexer.get_number());
 		}
 		case CalcToken::identifier:
 		{
-			return c_comp::parser::make_IDENTIFIER(calc_lexer->get_string().c_str());
+			return CalcParser::parser::make_IDENTIFIER(calc_lexer.get_string().c_str());
 		}
 		case CalcToken::round_bracket_open:
 		{
-			return c_comp::parser::make_ROUND_BRACKET_OPEN();
+			return CalcParser::parser::make_ROUND_BRACKET_OPEN();
 		}
 		case CalcToken::round_bracket_close:
 		{
-			return c_comp::parser::make_ROUND_BRACKET_CLOSE();
+			return CalcParser::parser::make_ROUND_BRACKET_CLOSE();
 		}
 		case CalcToken::curly_bracket_open:
 		{
-			return c_comp::parser::make_CURLY_BRACKET_OPEN();
+			return CalcParser::parser::make_CURLY_BRACKET_OPEN();
 		}
 		case CalcToken::curly_bracket_close:
 		{
-			return c_comp::parser::make_CURLY_BRACKET_CLOSE();
+			return CalcParser::parser::make_CURLY_BRACKET_CLOSE();
 		}
 		case CalcToken::equals:
 		{
-			return c_comp::parser::make_EQUALS();
+			return CalcParser::parser::make_EQUALS();
 		}
 		case CalcToken::plus:
 		{
-			return c_comp::parser::make_PLUS();
+			return CalcParser::parser::make_PLUS();
 		}
 		case CalcToken::minus:
 		{
-			return c_comp::parser::make_MINUS();
+			return CalcParser::parser::make_MINUS();
 		}
 		case CalcToken::multiply:
 		{
-			return c_comp::parser::make_MULTIPLY();
+			return CalcParser::parser::make_MULTIPLY();
 		}
 		case CalcToken::divide:
 		{
-			return c_comp::parser::make_DIVIDE();
+			return CalcParser::parser::make_DIVIDE();
 		}
 		case CalcToken::end_of_input:
 		{
-			return c_comp::parser::make_END_OF_FILE();
+			return CalcParser::parser::make_END_OF_FILE();
 		}
 	}
 
