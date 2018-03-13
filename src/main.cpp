@@ -1,8 +1,10 @@
 #include <fstream>
 #include <iostream>
 
+#include "interpreter/interpreter.h"
+
 #include "parser/calc_lexer.h"
-#include <calc_parser.hpp>
+#include "parser/calc_parser.h"
 
 int main(int argc, char** argv)
 {
@@ -13,9 +15,12 @@ int main(int argc, char** argv)
 			std::string path(argv[1]);
 			std::ifstream file(path.c_str());
 
-			CalcLexer cl(file);
-			CalcParser::parser p(cl);
-			p.parse ();
+			CalcParser p(file);
+			translation_unit unit = p.parse ();
+
+			Interpreter interp;
+			interp.add(&unit);
+			interp.execute();
 		}
 		else
 		{

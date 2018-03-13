@@ -45,7 +45,7 @@ struct num_node : public expr_node
 
 struct binary_operator_node : public expr_node
 {
-    binary_operator_node(char s, expr_node* l, expr_node* r)
+    binary_operator_node(char s, expr_node l, expr_node r)
     {
         type = node_type::BINARY_OPERATOR;
         symbol = s;
@@ -54,8 +54,8 @@ struct binary_operator_node : public expr_node
     }
 
     char symbol;
-    expr_node* left;
-    expr_node* right;
+    expr_node left;
+    expr_node right;
 };
 
 struct unary_operator_node : public expr_node
@@ -78,15 +78,15 @@ struct statement_node : public tree_node
 
 struct assignment_node : public statement_node
 {
-    assignment_node(std::string* n, expr_node* e)
+    assignment_node(std::string n, expr_node e)
     {
         type = node_type::ASSIGNMENT;
         name = n;
         expr = e;
     }
 
-    std::string* name;
-    expr_node* expr;
+    std::string name;
+    expr_node expr;
 };
 
 struct variable_declaration_node : public statement_node
@@ -148,13 +148,13 @@ struct function_call_node : public expr_node
 
 struct identifier_node : public expr_node
 {
-    identifier_node(std::string* n)
+    identifier_node(std::string n)
     {
         type = node_type::IDENTIFIER;
         name = n;
     }
 
-    std::string* name;
+    std::string name;
 };
 
 struct statement_list_node : public tree_node
@@ -200,17 +200,15 @@ struct parameter_list_node : public tree_node
 
 struct function_node : public tree_node
 {
-    function_node(std::string n, parameter_list_node* p, block_node* b)
+    function_node(std::string n, parameter_list_node p, block_node b)
+    : name{ n }, block{ b }, parameters{ p }
     {
         type = node_type::FUNCTION;
-        name = n;
-        parameters = p;
-        block = b;
     }
 
     std::string name; 
-    parameter_list_node* parameters;
-    block_node* block;
+    parameter_list_node parameters;
+    block_node block;
 };
 
 struct translation_unit
@@ -220,7 +218,7 @@ struct translation_unit
         
     }
 
-    void add(function_node* function);
+    void add(function_node function);
 
-    std::map<std::string, function_node*> functions;
+    std::map<std::string, function_node> functions;
 };

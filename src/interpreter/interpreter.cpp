@@ -64,7 +64,7 @@ void Interpreter::impl::add(translation_unit* unit)
 
 	for (auto function : unit->functions)
 	{
-		process_function(*function.second, module);
+		process_function(function.second, module);
 	}
 
 	module->dump();
@@ -178,8 +178,8 @@ llvm::Value* Interpreter::impl::process_num(num_node& node, llvm::Module* module
 
 llvm::Value* Interpreter::impl::process_binary_operator(binary_operator_node& node, llvm::Module* module)
 {
-	llvm::Value* left = process_expr(*node.left, module);
-	llvm::Value* right = process_expr(*node.right, module);
+	llvm::Value* left = process_expr(node.left, module);
+	llvm::Value* right = process_expr(node.right, module);
 
 	llvm::Value* result;
 
@@ -241,9 +241,9 @@ llvm::Value* Interpreter::impl::process_function_call(function_call_node& node, 
 
 llvm::Value* Interpreter::impl::process_identifier(identifier_node& node, llvm::Module* module)
 {
-	std::string* name = node.name;
+	std::string name = node.name;
 
-	calc_symbol* symbol = find_symbol(*name);
+	calc_symbol* symbol = find_symbol(name);
 	if (symbol != nullptr)
 	{
 		llvm::AllocaInst* alloca = symbol->value;
@@ -278,14 +278,14 @@ llvm::Value* Interpreter::impl::process_expr(expr_node& node, llvm::Module* modu
 
 void Interpreter::impl::process_assignment(assignment_node& node, llvm::Module* module)
 {
-	std::string* name = node.name;
+	std::string name = node.name;
 
-	calc_symbol* symbol = find_symbol(*name);
+	calc_symbol* symbol = find_symbol(name);
 	if (symbol != nullptr)
 	{
 		llvm::AllocaInst* alloca = symbol->value;
 
-		llvm::Value* value = process_expr(*node.expr, module);
+		llvm::Value* value = process_expr(node.expr, module);
 
 		builder.CreateStore(value, alloca);
 
@@ -406,7 +406,7 @@ void Interpreter::impl::process_function(function_node& function, llvm::Module* 
 	llvm::Function *mainFunc = 
 	  llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, function.name.c_str(), &*module);
 
-	process_function_block(*function.block, mainFunc, module);
+	process_function_block(function.block, mainFunc, module);
 
 	symbols.pop_back();
 }
