@@ -7,10 +7,7 @@ VariantList::VariantList()
 
 VariantList::~VariantList()
 {
-    for (auto item_ptr : items)
-    {
-        delete item_ptr;
-    }
+    items.clear();
 }
 
 int VariantList::size() const

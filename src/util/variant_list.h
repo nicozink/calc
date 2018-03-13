@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 class VariantList
@@ -20,19 +21,25 @@ class VariantList
 
     private:
 
-    std::vector<void*> items;
+    std::vector<std::shared_ptr<void> > items;
 };
 
 template <typename T>
 T& VariantList::get(int i)
 {
-    T* item_ptr = static_cast<T*>(items[i]);
-    return *item_ptr;
+    std::shared_ptr<T> ptr = std::static_pointer_cast<T>(items[i]);
+
+    return *ptr;
 }
 
 template <typename T>
 void VariantList::push_back(const T& item)
 {
     T* item_ptr = new T(item);
-    items.push_back(item_ptr);
+
+    std::shared_ptr<void> ptr(item_ptr, [](void* p) {
+        delete static_cast<T*>(p);
+    } );
+
+    items.push_back(ptr);
 }
