@@ -17,101 +17,106 @@ enum class Tokens
 	end_of_input
 };
 
-template <typename TokenType>
+template <typename TokenType, typename ValueType>
 class production
 {
 	public:
 
-	production<TokenType> execute(std::function<TokenType(VariantList&)> func);
+	production<TokenType, ValueType> execute(std::function<ValueType(VariantList&)> func);
+
+	production<TokenType, ValueType> read_token(TokenType token_type);
 
 	template <typename ReadType>
-	production<TokenType> read();
+	production<TokenType, ValueType> read_type(std::string regex);
 
 	template <typename ReadType>
-	production<TokenType> read(std::string production_name);
+	production<TokenType, ValueType> read_value(ReadType value);
 
-	template <typename ReadType>
-	production<TokenType> read(ReadType value);
-
-	typedef TokenType TType;
+	typedef ValueType TType;
 };
 
-template <typename ParseType>
+template <typename TokenType>
 class grammar
 {
 	public:
 
-	template <typename TokenType>
-	production<TokenType> add_production();
+	template <typename ValueType>
+	production<TokenType, ValueType> add_production(TokenType type);
+};
 
-	template <typename TokenType>
-	production<TokenType> add_production(std::string production_name);
+enum class Token
+{
+    assignment,
+    sum,
+    product,
+    value,
+    identifier
 };
 
 void parse_definition()
 {
-	grammar<assignment_node> g;
+	grammar<Token> g;
 
-	g.add_production<assignment_node>("Assign")
-		.read<std::string>()
-		.read('=')
-		.read<expr_node>("Sums")
+	g.add_production<assignment_node>(Token::assignment)
+		.read_token(Token::identifier)
+		.read_value('=')
+		.read_token(Token::sum)
 		.execute([](VariantList &v) {
-			auto& id = v.get<std::string>(0);
+			auto& id = v.get<identifier_node>(0).name;
 			auto& expr = v.get<expr_node>(2);
 			return assignment_node(id, expr);
 		});
 
-	g.add_production<expr_node>("Sums")
-		.read<expr_node>("Sums")
-		.read('+')
-		.read<expr_node>("Products")
+	g.add_production<expr_node>(Token::sum)
+		.read_token(Token::sum)
+		.read_value('+')
+		.read_token(Token::product)
 		.execute([](VariantList &v) {
 			auto& sums = v.get<expr_node>(0);
 			auto& products = v.get<expr_node>(2);
 			return binary_operator_node('+', sums, products);
 		});
 
-	g.add_production<expr_node>("Sums")
-		.read<expr_node>("Products")
+	g.add_production<expr_node>(Token::sum)
+		.read_token(Token::product)
 		.execute([](VariantList &v) {
 			auto& products = v.get<expr_node>(0);
 			return products;
 		});
 
-	g.add_production<expr_node>("Products")
-		.read<expr_node>("Products")
-		.read('*')
-		.read<expr_node>("Value")
+	g.add_production<expr_node>(Token::product)
+		.read_token(Token::product)
+		.read_value('*')
+		.read_token(Token::value)
 		.execute([](VariantList &v) {
 			auto& products = v.get<expr_node>(0);
 			auto& value = v.get<expr_node>(2);
 			return binary_operator_node('*', products, value);
 		});
 
-	g.add_production<expr_node>("Products")
-		.read<expr_node>("Value")
+	g.add_production<expr_node>(Token::product)
+		.read_token(Token::value)
 		.execute([](VariantList &v) {
 			auto& value = v.get<expr_node>(0);
 			return value;
 		});
 	
-	g.add_production<expr_node>("Value")
-		.read<double>()
+	g.add_production<expr_node>(Token::value)
+		.read_type<double>("^(-?)(0|([1-9][0-9]*))(\\.[0-9]+)?$")
 		.execute([](VariantList &v) {
 			auto& value = v.get<double>(0);
 			return num_node(value);
 		});
 	
-	g.add_production<expr_node>("Value")
-		.read<identifier_node>()
+	g.add_production<expr_node>(Token::value)
+		.read_token(Token::identifier)
 		.execute([](VariantList &v) {
 			auto& value = v.get<identifier_node>(0);
 			return value;
 		});
 	
-	g.add_production<identifier_node>()
-		.read<std::string>()
+	g.add_production<identifier_node>(Token::identifier)
+		.read_type<std::string>("^[a-zA-Z_$][a-zA-Z_$0-9]*$")
 		.execute([](VariantList &v) {
 			auto& value = v.get<std::string>(0);
 			return identifier_node(value);
