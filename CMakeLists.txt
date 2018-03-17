@@ -15,57 +15,80 @@ endmacro()
 
 add_subdirectory(libraries/unittest)
 
-set(SRC_PARSER
-	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc_lexer.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc_parser.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc_parser_test.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/interpreter/interpreter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/util/variant_list.cpp)
+#
+# cpp_util
+#
 
-add_library(calc_parser ${SRC_PARSER})
+set(SRC_CPP_UTIL
+	${CMAKE_CURRENT_SOURCE_DIR}/src/cpp_util/types/variant_list.cpp)
 
-target_include_directories(calc_parser
+add_library(cpp_util ${SRC_CPP_UTIL})
+
+target_include_directories(cpp_util
 	PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_compile_features(calc_parser
+target_compile_features(cpp_util
+	PRIVATE
+	cxx_auto_type)
+
+#
+# parser
+#
+
+set(SRC_PARSER
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/parse_result.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/parser.cpp)
+
+add_library(parser ${SRC_PARSER})
+
+target_include_directories(parser
+	PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+target_compile_features(parser
 	PRIVATE
 	cxx_auto_type
 	cxx_strong_enums)
 
+target_link_libraries(parser cpp_util)
+
+#
+# main
+#
+
 set(SRC_MAIN
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc_parser_test.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc_lexer.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/parser/calc_parser.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/interpreter/interpreter.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 
-add_library(llvm_backend INTERFACE)
+add_executable(calc_parser ${SRC_MAIN})
 
-target_include_directories(llvm_backend
-	INTERFACE "/usr/lib/llvm-3.8/include/")
-
-link_directories("/usr/lib/llvm-3.8/lib/")
-
-target_link_libraries(llvm_backend
-	INTERFACE
-	LLVMX86Disassembler LLVMX86AsmParser LLVMX86CodeGen LLVMSelectionDAG LLVMAsmPrinter LLVMX86Desc LLVMMCDisassembler LLVMX86Info LLVMX86AsmPrinter LLVMX86Utils LLVMMCJIT LLVMInterpreter LLVMExecutionEngine LLVMRuntimeDyld LLVMCodeGen LLVMTarget LLVMScalarOpts LLVMInstCombine LLVMInstrumentation LLVMProfileData LLVMObject LLVMMCParser LLVMTransformUtils LLVMMC LLVMBitWriter LLVMAnalysis LLVMRuntimeDyld LLVMObject LLVMMCParser LLVMMC LLVMIRReader LLVMBitReader LLVMAsmParser LLVMCore LLVMSupport rt dl tinfo pthread z m ffi)
-
-add_executable(calc_test ${SRC_MAIN})
-
-target_include_directories(calc_test
+target_include_directories(calc_parser
 	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_link_libraries(calc_test calc_parser llvm_backend)
+target_link_libraries(calc_parser parser cpp_util)
 
-target_compile_features(calc_test
+target_compile_features(calc_parser
 	PRIVATE
 	cxx_strong_enums)
 
 set(SRC_TEST
+	${CMAKE_CURRENT_SOURCE_DIR}/test/parser/test_parser.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/test/util/test_regex.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/test/util/test_variant_list.cpp)
 
-add_executable(calc_test_test ${SRC_TEST})
+add_executable(calc_test ${SRC_TEST})
 
-target_link_libraries(calc_test_test calc_parser llvm_backend unittest)
+target_link_libraries(calc_test parser cpp_util unittest)
 
-add_test(NAME calc_test_test
-	COMMAND calc_test_test)
+add_test(NAME calc_test
+	COMMAND calc_test)

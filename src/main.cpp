@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 	{
 		if (argc > 1)
 		{
-			std::string path(argv[1]);
+			/*std::string path(argv[1]);
 			std::ifstream file(path.c_str());
 
 			CalcParser p(file);
@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
 			Interpreter interp;
 			interp.add(&unit);
-			interp.execute();
+			interp.execute();*/
 		}
 		else
 		{

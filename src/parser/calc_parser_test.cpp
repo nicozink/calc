@@ -2,47 +2,9 @@
 
 #include "calc.h"
 
-#include "util/variant_list.h"
+#include <cpp_util/types/variant_list.h>
 
-enum class Tokens
-{
-    program,
-    translation_unit,
-    function,
-    parameter_list,
-    statement_list,
-    block,
-    statement,
-    expr,
-	end_of_input
-};
-
-template <typename TokenType, typename ValueType>
-class production
-{
-	public:
-
-	production<TokenType, ValueType> execute(std::function<ValueType(VariantList&)> func);
-
-	production<TokenType, ValueType> read_token(TokenType token_type);
-
-	template <typename ReadType>
-	production<TokenType, ValueType> read_type(std::string regex);
-
-	template <typename ReadType>
-	production<TokenType, ValueType> read_value(ReadType value);
-
-	typedef ValueType TType;
-};
-
-template <typename TokenType>
-class grammar
-{
-	public:
-
-	template <typename ValueType>
-	production<TokenType, ValueType> add_production(TokenType type);
-};
+#include <parser/parser.h>
 
 enum class Token
 {
@@ -50,7 +12,8 @@ enum class Token
     sum,
     product,
     value,
-    identifier
+    identifier,
+	whitespace
 };
 
 void parse_definition()
@@ -121,4 +84,7 @@ void parse_definition()
 			auto& value = v.get<std::string>(0);
 			return identifier_node(value);
 		});
+	
+	g.add_production<void>(Token::whitespace)
+		.read_type<void>("\t\n\r");
 }
