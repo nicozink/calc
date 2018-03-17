@@ -37,7 +37,11 @@ class parser
 {
     public:
 
-    parse_result parse(std::string str);
+    parse_result parse(std::istream& input);
+
+	parse_result parse(const std::string str);
+
+	parse_result parse_file(const std::string path);
 };
 
 template <typename TokenType>
@@ -69,7 +73,7 @@ production<TokenType, ValueType>& production<TokenType, ValueType>::read_token(T
 {
     return *this;
 }
- 
+
 template <typename TokenType, typename ValueType>
 template <typename ReadType>
 production<TokenType, ValueType>& production<TokenType, ValueType>::read_type(std::string regex)
