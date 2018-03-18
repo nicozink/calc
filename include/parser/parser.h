@@ -9,8 +9,7 @@ All rights reserved.
 #include "parse_result.h"
 
 // Project includes
-#include <parser/parser.h>
-#include <cpp_util/types/variant_list.h>
+ #include <cpp_util/types/variant_list.h>
 
 // System Includes
 #include <functional>

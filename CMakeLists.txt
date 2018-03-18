@@ -39,6 +39,7 @@ target_compile_features(cpp_util
 #
 
 set(SRC_PARSER
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/lexer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/parse_result.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/parser.cpp)
 
@@ -82,6 +83,7 @@ target_compile_features(calc_parser
 	cxx_strong_enums)
 
 set(SRC_TEST
+	${CMAKE_CURRENT_SOURCE_DIR}/test/parser/test_lexer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/test/parser/test_parser.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/test/util/test_regex.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/test/util/test_variant_list.cpp)
