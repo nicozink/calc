@@ -13,6 +13,7 @@ All rights reserved.
 
 // System Includes
 #include <functional>
+#include <string>
 
 template <typename TokenType, typename ValueType>
 class production
