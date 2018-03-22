@@ -20,9 +20,9 @@ TEST(Parser, TestSimpleNumber)
 
     grammar<Token> g;
 
-	g.add_production<int>(Token::value)
+	g.add_production(Token::value)
 		.read_type<int>("[1-9][0-9]*")
-		.execute([](VariantList &v) {
+		.execute<int>([](VariantList &v) {
 			auto value = v.get<int>(0);
 			return value;
 		});

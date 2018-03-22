@@ -9,29 +9,12 @@ All rights reserved.
 #include "parse_result.h"
 
 // Project includes
- #include <cpp_util/types/variant_list.h>
+#include <cpp_util/types/value_to_id.h>
+#include <cpp_util/types/variant_list.h>
 
 // System Includes
 #include <functional>
 #include <string>
-
-template <typename TokenType, typename ValueType>
-class production
-{
-	public:
-
-	production<TokenType, ValueType>& execute(std::function<ValueType(VariantList&)> func);
-
-	production<TokenType, ValueType>& read_token(TokenType token_type);
-
-	template <typename ReadType>
-	production<TokenType, ValueType>& read_type(std::string regex);
-
-	template <typename ReadType>
-	production<TokenType, ValueType>& read_value(ReadType value);
-
-	typedef ValueType TType;
-};
 
 class parser
 {
@@ -44,22 +27,58 @@ class parser
 	parse_result parse_file(const std::string path);
 };
 
+typedef int token_id;
+
 template <typename TokenType>
-class grammar
+class production
 {
-	public:
+public:
+
+	production(token_id id);
 
 	template <typename ValueType>
-	production<TokenType, ValueType> add_production(TokenType type);
+	production<TokenType>& execute(std::function<ValueType(VariantList&)> func);
 
-    parser generate();
+	production<TokenType>& read_token(TokenType token_type);
+
+	template <typename ReadType>
+	production<TokenType>& read_type(std::string regex);
+
+	template <typename ReadType>
+	production<TokenType>& read_value(ReadType value);
+
+private:
+
+	token_id id;
 };
 
 template <typename TokenType>
-template <typename ValueType>
-production<TokenType, ValueType> grammar<TokenType>::add_production(TokenType type)
+production<TokenType>::production(token_id id)
 {
-    return production<TokenType, ValueType>();
+	this->id = id;
+}
+
+template <typename TokenType>
+class grammar
+{
+public:
+
+	production<TokenType>& add_production(TokenType type);
+
+    parser generate();
+
+private:
+
+	std::vector<production<TokenType>> productions;
+};
+
+template <typename TokenType>
+production<TokenType>& grammar<TokenType>::add_production(TokenType type)
+{
+	token_id id = ValueToId<TokenType, token_id>::get_id(type);
+	productions.push_back(production<TokenType>(id));
+
+    return productions.back();
 }
 
 template <typename TokenType>
@@ -68,28 +87,29 @@ parser grammar<TokenType>::generate()
     return parser();
 }
 
-template <typename TokenType, typename ValueType>
-production<TokenType, ValueType>& production<TokenType, ValueType>::read_token(TokenType token_type)
+template <typename TokenType>
+production<TokenType>& production<TokenType>::read_token(TokenType token_type)
 {
     return *this;
 }
 
-template <typename TokenType, typename ValueType>
+template <typename TokenType>
 template <typename ReadType>
-production<TokenType, ValueType>& production<TokenType, ValueType>::read_type(std::string regex)
+production<TokenType>& production<TokenType>::read_type(std::string regex)
 {
     return *this;
 }
 
-template <typename TokenType, typename ValueType>
+template <typename TokenType>
 template <typename ReadType>
-production<TokenType, ValueType>& production<TokenType, ValueType>::read_value(ReadType value)
+production<TokenType>& production<TokenType>::read_value(ReadType value)
 {
     return *this;
 }
 
-template <typename TokenType, typename ValueType>
-production<TokenType, ValueType>& production<TokenType, ValueType>::execute(std::function<ValueType(VariantList&)> func)
+template <typename TokenType>
+template <typename ValueType>
+production<TokenType>& production<TokenType>::execute(std::function<ValueType(VariantList&)> func)
 {
     return *this;
 }
