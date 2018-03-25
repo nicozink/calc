@@ -20,7 +20,8 @@ add_subdirectory(libraries/unittest)
 #
 
 set(SRC_CPP_UTIL
-	${CMAKE_CURRENT_SOURCE_DIR}/src/cpp_util/types/variant_list.cpp)
+	${CMAKE_CURRENT_SOURCE_DIR}/src/cpp_util/types/variant_list.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/cpp_util/types/variant_type.cpp)
 
 add_library(cpp_util ${SRC_CPP_UTIL})
 
@@ -86,7 +87,8 @@ set(SRC_TEST
 	${CMAKE_CURRENT_SOURCE_DIR}/test/parser/test_lexer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/test/parser/test_parser.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/test/util/test_regex.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/test/util/test_variant_list.cpp)
+	${CMAKE_CURRENT_SOURCE_DIR}/test/util/test_variant_list.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/test/util/test_variant_type.cpp)
 
 add_executable(calc_test ${SRC_TEST})
 

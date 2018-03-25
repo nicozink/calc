@@ -6,7 +6,7 @@ All rights reserved.
 // Local Includes
 
 // Project Includes
-#include <parser/parser.h>
+#include <parser/grammar.h>
 #include <unittest/test.h>
 
 // External Includes

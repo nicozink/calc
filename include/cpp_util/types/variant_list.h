@@ -1,6 +1,16 @@
+/*
+Copyright © Nico Zink
+All rights reserved.
+*/
+
 #pragma once
 
-#include <memory>
+// Local includes
+#include "variant_type.h"
+
+// Project includes
+
+// System Includes
 #include <vector>
 
 class VariantList
@@ -20,26 +30,21 @@ class VariantList
     int size() const;
 
     private:
-
-    std::vector<std::shared_ptr<void> > items;
+		 
+    std::vector<VariantType> items;
 };
 
 template <typename T>
 T& VariantList::get(int i)
 {
-    std::shared_ptr<T> ptr = std::static_pointer_cast<T>(items[i]);
-
-    return *ptr;
+	return items[i].get<T>();
 }
 
 template <typename T>
 void VariantList::push_back(const T& item)
 {
-    T* item_ptr = new T(item);
+    VariantType type;
+	type.set(item);
 
-    std::shared_ptr<void> ptr(item_ptr, [](void* p) {
-        delete static_cast<T*>(p);
-    } );
-
-    items.push_back(ptr);
+    items.push_back(std::move(type));
 }

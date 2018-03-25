@@ -23,5 +23,5 @@ VariantList::~VariantList()
 
 int VariantList::size() const
 {
-    return items.size();
+	return items.size();
 }
