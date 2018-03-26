@@ -6,7 +6,7 @@ All rights reserved.
 // Local Includes
 
 // Project Includes
-#include <parser/grammar.h>
+#include <parser/parser_generator.h>
 #include <unittest/test.h>
 
 // External Includes
@@ -18,7 +18,7 @@ TEST(Parser, TestSimpleNumber)
         value
     };
 
-    grammar<Token> g;
+    ParserGenerator<Token> g;
 
 	g.add_production(Token::value)
 		.read_type<int>("[1-9][0-9]*")

@@ -42,7 +42,8 @@ target_compile_features(cpp_util
 set(SRC_PARSER
 	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/lexer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/parse_result.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/parser.cpp)
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/parser.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/parser/production_data.cpp)
 
 add_library(parser ${SRC_PARSER})
 

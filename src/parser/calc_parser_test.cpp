@@ -4,7 +4,7 @@
 
 #include <cpp_util/types/variant_list.h>
 
-#include <parser/parser.h>
+#include <parser/parser_generator.h>
 
 enum class Token
 {
@@ -18,7 +18,7 @@ enum class Token
 
 void parse_definition()
 {
-	grammar<Token> g;
+	ParserGenerator<Token> g;
 
 	g.add_production(Token::assignment)
 		.read_token(Token::identifier)

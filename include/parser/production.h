@@ -6,6 +6,7 @@ All rights reserved.
 #pragma once
 
 // Local includes
+#include "production_data.h"
 #include "token_id.h"
 
 // Project includes
@@ -17,7 +18,7 @@ class production
 {
 public:
 
-	production(token_id id);
+	production(ProductionData& data);
 
 	production(production<TokenType>&& p);
 
@@ -37,17 +38,53 @@ public:
 
 private:
 
-	token_id id;
+	ProductionData& data;
 };
 
 template <typename TokenType>
-production<TokenType>::production(token_id id)
+production<TokenType>::production(ProductionData& data)
+	: data{ data}
 {
-	this->id = id;
+	
 }
 
 template <typename TokenType>
 production<TokenType>::production(production<TokenType>&& p)
+	: data{ p.data }
 {
-	this->id = p.id;
+	
+}
+
+template <typename TokenType>
+production<TokenType>& production<TokenType>::read_token(TokenType token_type)
+{
+	token_id id = ValueToId<TokenType, token_id>::get_id(token_type);
+	data.add_symbol(id);
+
+	return *this;
+}
+
+template <typename TokenType>
+template <typename ReadType>
+production<TokenType>& production<TokenType>::read_type(std::string regex)
+{
+	return *this;
+}
+
+template <typename TokenType>
+template <typename ReadType>
+production<TokenType>& production<TokenType>::read_value(ReadType value)
+{
+	return *this;
+}
+
+template <typename TokenType>
+template <typename ValueType>
+production<TokenType>& production<TokenType>::execute(std::function<ValueType(VariantList&)> func)
+{
+	data.set_execute([func](VariantType& t, VariantList &v) {
+		t.set(func(v));
+	});
+
+	return *this;
 }
