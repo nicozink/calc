@@ -1,5 +1,5 @@
 /*
-Copyright © Nico Zink
+Copyright ï¿½ Nico Zink
 All rights reserved.
 */
 
@@ -7,9 +7,9 @@ All rights reserved.
 
 // Local includes
 #include "production_data.h"
-#include "token_id.h"
 
 // Project includes
+#include <cpp_util/types/value_to_id.h>
 
 // System Includes
 
@@ -18,7 +18,7 @@ class production
 {
 public:
 
-	production(ProductionData& data);
+	production(ProductionData& data, ValueToId& id_generator);
 
 	production(production<TokenType>&& p);
 
@@ -39,18 +39,20 @@ public:
 private:
 
 	ProductionData& data;
+
+	ValueToId& id_generator;
 };
 
 template <typename TokenType>
-production<TokenType>::production(ProductionData& data)
-	: data{ data}
+production<TokenType>::production(ProductionData& data, ValueToId& id_generator)
+	: data{ data}, id_generator{ id_generator }
 {
 	
 }
 
 template <typename TokenType>
 production<TokenType>::production(production<TokenType>&& p)
-	: data{ p.data }
+	: data{ p.data }, id_generator{ p.id_generator }
 {
 	
 }
@@ -58,7 +60,7 @@ production<TokenType>::production(production<TokenType>&& p)
 template <typename TokenType>
 production<TokenType>& production<TokenType>::read_token(TokenType token_type)
 {
-	token_id id = ValueToId<TokenType, token_id>::get_id(token_type);
+	ValueToId::value_id id = id_generator.get_id<TokenType>(token_type);
 	data.add_symbol(id);
 
 	return *this;

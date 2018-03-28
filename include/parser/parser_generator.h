@@ -1,5 +1,5 @@
 /*
-Copyright © Nico Zink
+Copyright ï¿½ Nico Zink
 All rights reserved.
 */
 
@@ -33,6 +33,8 @@ private:
 
 	Grammar<TokenType> grammar;
 
+	ValueToId id_generator;
+
 	std::vector<ProductionData> productions;
 };
 
@@ -42,10 +44,10 @@ production<TokenType> ParserGenerator<TokenType>::add_production(TokenType type)
 	productions.emplace_back();
 	ProductionData& data = productions.back();
 
-	token_id id = ValueToId<TokenType, token_id>::get_id(type);
+	token_id id = id_generator.get_id<TokenType>(type);
 	data.set_id(id);
 
-	return production<TokenType>(data);
+	return production<TokenType>(data, id_generator);
 }
 
 template <typename TokenType>
