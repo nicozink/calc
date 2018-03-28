@@ -13,9 +13,9 @@ All rights reserved.
 // System Includes
 #include <vector>
 
-class VariantList
+class VariantList : public std::vector<VariantType>
 {
-    public:
+public:
 
     VariantList();
 
@@ -26,18 +26,12 @@ class VariantList
 
     template <typename T>
 	void push_back(const T& item);
-
-    int size() const;
-
-    private:
-		 
-    std::vector<VariantType> items;
 };
 
 template <typename T>
 T& VariantList::get(int i)
 {
-	return items[i].get<T>();
+	return (*this)[i].get<T>();
 }
 
 template <typename T>
@@ -46,5 +40,5 @@ void VariantList::push_back(const T& item)
     VariantType type;
 	type.set(item);
 
-    items.push_back(std::move(type));
+	std::vector<VariantType>::push_back(std::move(type));
 }
