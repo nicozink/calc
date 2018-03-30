@@ -1,5 +1,5 @@
 /*
-Copyright © Nico Zink
+Copyright (c) Nico Zink
 All rights reserved.
 */
 
@@ -30,28 +30,30 @@ public:
 };
 
 template <typename IndexType>
-VariantMap<typename IndexType>::VariantMap()
+VariantMap<IndexType>::VariantMap()
 {
 
 }
 
 template <typename IndexType>
-VariantMap<typename IndexType>::~VariantMap()
+VariantMap<IndexType>::~VariantMap()
 {
 
 }
 
+template <typename IndexType>
 template <typename T>
-T& get(IndexType i)
+T& VariantMap<IndexType>::get(IndexType i)
 {
 	return (*this)[i].get<T>();
 }
 
+template <typename IndexType>
 template <typename T>
-void insert(std::pair<IndexType, T> pair)
+void VariantMap<IndexType>::insert(std::pair<IndexType, T> pair)
 {
 	VariantType type;
 	type.set(pair.second);
 
-	std::map<VariantType>::insert({ pair.first, std::move(type) });
+	std::map<IndexType, VariantType>::insert({ pair.first, std::move(type) });
 }

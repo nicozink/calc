@@ -1,5 +1,5 @@
 /*
-Copyright � Nico Zink
+Copyright (c) Nico Zink
 All rights reserved.
 */
 
@@ -70,6 +70,9 @@ template <typename TokenType>
 template <typename ReadType>
 production<TokenType>& production<TokenType>::read_type(std::string regex)
 {
+	ValueToId::value_id id = id_generator.get_id<std::string>(regex);
+	data.add_symbol(id);
+
 	return *this;
 }
 
