@@ -45,7 +45,8 @@ template <typename IndexType>
 template <typename T>
 T& VariantMap<IndexType>::get(IndexType i)
 {
-	return (*this)[i].get<T>();
+	VariantType& v = (*this)[i];
+	return v.get<T>();
 }
 
 template <typename IndexType>

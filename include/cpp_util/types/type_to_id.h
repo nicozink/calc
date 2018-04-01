@@ -22,7 +22,7 @@ public:
 	template<typename Type>
 	static type_id get_id();
 
-	static type_id TypeToId::get_next_id();
+	static type_id get_next_id();
 
 private:
 

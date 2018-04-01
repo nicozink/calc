@@ -16,29 +16,29 @@ All rights reserved.
 #include <functional>
 #include <vector>
 
-class ProductionData
+class TokenData
 {
 public:
 
-	ProductionData();
+	TokenData();
 
-	void add_symbol(ValueToId::value_id symbol_id);
-
-	std::function<void(VariantType&, VariantList&)>& get_execute();
-
-	std::vector<ValueToId::value_id>& get_symbols();
+	std::function<void(VariantType&)>& get_execute();
 
 	ValueToId::value_id get_id();
 
-	void set_execute(std::function<void(VariantType&, VariantList&)> func);
+	std::string get_regex();
+
+	void set_execute(std::function<void(VariantType&)> func);
 
 	void set_id(ValueToId::value_id id);
+
+	void set_regex(std::string regex);
 
 private:
 
 	ValueToId::value_id id;
 
-	std::vector<ValueToId::value_id> symbols;
+	std::string regex;
 
-	std::function<void(VariantType&, VariantList&)> read_function;
+	std::function<void(VariantType&)> read_function;
 };

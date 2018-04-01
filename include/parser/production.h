@@ -18,7 +18,7 @@ class production
 {
 public:
 
-	production(ProductionData& data, ValueToId& id_generator);
+	production(Grammar& grammar, TokenType type);
 
 	production(production<TokenType>&& p);
 
@@ -40,19 +40,19 @@ private:
 
 	ProductionData& data;
 
-	ValueToId& id_generator;
+	Grammar& grammar;
 };
 
 template <typename TokenType>
-production<TokenType>::production(ProductionData& data, ValueToId& id_generator)
-	: data{ data}, id_generator{ id_generator }
+production<TokenType>::production(Grammar& grammar, TokenType type)
+	: data{ grammar.add_production(type) }, grammar{ grammar }
 {
 	
 }
 
 template <typename TokenType>
 production<TokenType>::production(production<TokenType>&& p)
-	: data{ p.data }, id_generator{ p.id_generator }
+	: data{ p.data }, grammar{ p.grammar }
 {
 	
 }
@@ -60,7 +60,7 @@ production<TokenType>::production(production<TokenType>&& p)
 template <typename TokenType>
 production<TokenType>& production<TokenType>::read_token(TokenType token_type)
 {
-	ValueToId::value_id id = id_generator.get_id<TokenType>(token_type);
+	ValueToId::value_id id = grammar.id_generator.get_id<TokenType>(token_type);
 	data.add_symbol(id);
 
 	return *this;
@@ -70,7 +70,7 @@ template <typename TokenType>
 template <typename ReadType>
 production<TokenType>& production<TokenType>::read_type(std::string regex)
 {
-	ValueToId::value_id id = id_generator.get_id<std::string>(regex);
+	ValueToId::value_id id = grammar.id_generator.get_id<std::string>(regex);
 	data.add_symbol(id);
 
 	return *this;

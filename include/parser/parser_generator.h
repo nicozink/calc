@@ -1,5 +1,5 @@
 /*
-Copyright � Nico Zink
+Copyright (c) Nico Zink
 All rights reserved.
 */
 
@@ -13,7 +13,6 @@ All rights reserved.
 #include "production_data.h"
 
 // Project includes
-#include <cpp_util/types/value_to_id.h>
 #include <cpp_util/types/variant_list.h>
 
 // System Includes
@@ -31,23 +30,13 @@ public:
 
 private:
 
-	Grammar<TokenType> grammar;
-
-	ValueToId id_generator;
-
-	std::vector<ProductionData> productions;
+	Grammar grammar;
 };
 
 template <typename TokenType>
 production<TokenType> ParserGenerator<TokenType>::add_production(TokenType type)
 {
-	productions.emplace_back();
-	ProductionData& data = productions.back();
-
-	token_id id = id_generator.get_id<TokenType>(type);
-	data.set_id(id);
-
-	return production<TokenType>(data, id_generator);
+	return production<TokenType>(grammar, type);
 }
 
 template <typename TokenType>
