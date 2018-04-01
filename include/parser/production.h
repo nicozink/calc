@@ -33,8 +33,9 @@ public:
 	template <typename ReadType>
 	production<TokenType>& read_type(std::string regex);
 
-	template <typename ReadType>
-	production<TokenType>& read_value(ReadType value);
+	production<TokenType>& read_value(char value);
+
+	production<TokenType>& read_value(std::string value);
 
 private:
 
@@ -70,16 +71,27 @@ template <typename TokenType>
 template <typename ReadType>
 production<TokenType>& production<TokenType>::read_type(std::string regex)
 {
-	ValueToId::value_id id = grammar.id_generator.get_id<std::string>(regex);
-	data.add_symbol(id);
+	TokenData& token_data = grammar.add_token<ReadType>(regex);
+	data.add_symbol(token_data.get_id());
 
 	return *this;
 }
 
 template <typename TokenType>
-template <typename ReadType>
-production<TokenType>& production<TokenType>::read_value(ReadType value)
+production<TokenType>& production<TokenType>::read_value(char value)
 {
+	TokenData& token_data = grammar.add_token<char>(std::string{ 1, value });
+	data.add_symbol(token_data.get_id());
+
+	return *this;
+}
+
+template <typename TokenType>
+production<TokenType>& production<TokenType>::read_value(std::string value)
+{
+	TokenData& token_data = grammar.add_token<char>(value);
+	data.add_symbol(token_data.get_id());
+
 	return *this;
 }
 

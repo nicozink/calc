@@ -16,7 +16,7 @@ TokenData::TokenData()
 
 }
 
-std::function<void(VariantType&)>& TokenData::get_execute()
+std::function<void(VariantType&, std::string)>& TokenData::get_execute()
 {
 	return read_function;
 }
@@ -31,7 +31,7 @@ std::string TokenData::get_regex()
 	return regex;
 }
 
-void TokenData::set_execute(std::function<void(VariantType&)> func)
+void TokenData::set_execute(std::function<void(VariantType&, std::string)> func)
 {
 	read_function = func;
 }
