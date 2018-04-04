@@ -16,17 +16,17 @@ TokenData::TokenData()
 
 }
 
-std::function<void(VariantType&, std::string)>& TokenData::get_execute()
+const std::function<void(VariantType&, std::string)>& TokenData::get_execute() const
 {
 	return read_function;
 }
 
-ValueToId::value_id TokenData::get_id()
+ValueToId::value_id TokenData::get_id() const
 {
 	return id;
 }
 
-std::string TokenData::get_regex()
+std::string TokenData::get_regex() const
 {
 	return regex;
 }

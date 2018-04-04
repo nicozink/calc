@@ -1,5 +1,5 @@
 /*
-Copyright © Nico Zink
+Copyright (c) Nico Zink
 All rights reserved.
 */
 
@@ -17,21 +17,23 @@ All rights reserved.
 class Lexer
 {
 public:
+	typedef int token_id;
+	
 	Lexer();
 
-	void add_token(std::string regex);
+	void add_token(token_id id, std::string regex);
 
 	void parse(std::istream& input);
 
 	void parse(const std::string str);
 
-	std::string get_next();
+	std::pair<token_id, std::string> get_next();
 
 	bool has_next();
 
 private:
 
-	std::vector<std::string> tokens;
+	std::vector<std::pair<token_id, std::string>> tokens;
 
 	int input_position;
 

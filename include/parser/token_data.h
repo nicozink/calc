@@ -22,11 +22,11 @@ public:
 
 	TokenData();
 
-	std::function<void(VariantType&, std::string)>& get_execute();
+	const std::function<void(VariantType&, std::string)>& get_execute() const;
 
-	ValueToId::value_id get_id();
+	ValueToId::value_id get_id() const;
 
-	std::string get_regex();
+	std::string get_regex() const;
 
 	void set_execute(std::function<void(VariantType&, std::string)> func);
 

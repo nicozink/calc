@@ -6,7 +6,7 @@ All rights reserved.
 #pragma once
 
 // Local includes
-#include "parse_result.h"
+#include "lexer.h"
 #include "parser_data.h"
 
 // Project includes
@@ -21,9 +21,15 @@ public:
 
 	Parser(const ParserData& pd);
 
-	parse_result parse(std::istream& input);
+	VariantType parse(std::istream& input);
 
-	parse_result parse(const std::string str);
+	VariantType parse(const std::string str);
 
-	parse_result parse_file(const std::string path);
+	VariantType parse_file(const std::string path);
+
+private:
+
+	Lexer lex;
+
+	std::map<TypeToId::type_id, TokenData> token_lookup;
 };

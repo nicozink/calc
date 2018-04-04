@@ -1,5 +1,5 @@
 /*
-Copyright © Nico Zink
+Copyright (c) Nico Zink
 All rights reserved.
 */
 
@@ -16,24 +16,37 @@ All rights reserved.
 
 Parser::Parser(const ParserData& pd)
 {
-
+	for (auto& token : pd.tokens)
+	{
+		lex.add_token(token.get_id(), token.get_regex());
+		token_lookup.insert({ token.get_id(), token });
+	}
 }
 
-parse_result Parser::parse(std::istream& input)
+VariantType Parser::parse(std::istream& input)
 {
-	VariantList v;
-	v.push_back<int>(100);
-	
-	return parse_result(v);
+	VariantType v;
+
+	lex.parse(input);
+
+	while (lex.has_next())
+	{
+		auto match = lex.get_next();
+
+		TokenData& td = token_lookup[match.first];
+		td.get_execute()(v, match.second);
+	}
+
+	return v;
 }
 
-parse_result Parser::parse(const std::string str)
+VariantType Parser::parse(const std::string str)
 {
 	std::istringstream stream(str);
 	return parse(stream);
 }
 
-parse_result Parser::parse_file(const std::string path)
+VariantType Parser::parse_file(const std::string path)
 {
 	std::ifstream file(path.c_str());
 	return parse(file);
