@@ -1,5 +1,5 @@
 /*
-Copyright © Nico Zink
+Copyright (c) Nico Zink
 All rights reserved.
 */
 
@@ -7,6 +7,7 @@ All rights reserved.
 
 // Local includes
 #include "parse_result.h"
+#include "parser_data.h"
 
 // Project includes
 
@@ -14,9 +15,11 @@ All rights reserved.
 #include <functional>
 #include <string>
 
-class parser
+class Parser
 {
 public:
+
+	Parser(const ParserData& pd);
 
 	parse_result parse(std::istream& input);
 

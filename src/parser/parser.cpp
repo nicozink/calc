@@ -14,21 +14,26 @@ All rights reserved.
 #include <istream>
 #include <sstream>
 
-parse_result parser::parse(std::istream& input)
+Parser::Parser(const ParserData& pd)
+{
+
+}
+
+parse_result Parser::parse(std::istream& input)
 {
 	VariantList v;
 	v.push_back<int>(100);
-
+	
 	return parse_result(v);
 }
 
-parse_result parser::parse(const std::string str)
+parse_result Parser::parse(const std::string str)
 {
 	std::istringstream stream(str);
 	return parse(stream);
 }
 
-parse_result parser::parse_file(const std::string path)
+parse_result Parser::parse_file(const std::string path)
 {
 	std::ifstream file(path.c_str());
 	return parse(file);

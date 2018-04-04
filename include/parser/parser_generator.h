@@ -26,7 +26,7 @@ public:
 
 	production<TokenType> add_production(TokenType type);
 
-	parser generate();
+	Parser generate();
 
 private:
 
@@ -40,7 +40,16 @@ production<TokenType> ParserGenerator<TokenType>::add_production(TokenType type)
 }
 
 template <typename TokenType>
-parser ParserGenerator<TokenType>::generate()
+Parser ParserGenerator<TokenType>::generate()
 {
-	return parser();
+	ParserData pd;
+
+	pd.productions = grammar.productions;
+
+	for (auto it = grammar.tokens.begin(); it != grammar.tokens.end(); ++it)
+	{
+		pd.tokens.push_back(it->second);
+	}
+
+	return Parser(pd);
 }

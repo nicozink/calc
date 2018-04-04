@@ -27,7 +27,7 @@ TEST(Parser, TestSimpleNumber)
 			return value;
 		});
     
-    parser p = g.generate();
+    Parser p = g.generate();
 
     ASSERT(p.parse("100").get<int>() == 100);
 }
