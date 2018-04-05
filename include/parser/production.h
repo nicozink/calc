@@ -39,10 +39,27 @@ public:
 
 private:
 
+	bool is_special_character(char c);
+
 	ProductionData& data;
 
 	Grammar& grammar;
 };
+
+template <typename TokenType>
+bool production<TokenType>::is_special_character(char c)
+{
+	std::string special_characters(R"(([\^$.|?*+(){}))");
+
+	if (special_characters.find(c) != std::string::npos)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 template <typename TokenType>
 production<TokenType>::production(Grammar& grammar, TokenType type)
@@ -80,7 +97,16 @@ production<TokenType>& production<TokenType>::read_type(std::string regex)
 template <typename TokenType>
 production<TokenType>& production<TokenType>::read_value(char value)
 {
-	TokenData& token_data = grammar.add_token<char>(std::string{ 1, value });
+	std::string regex;
+
+	if (is_special_character(value))
+	{
+		regex.append(1, '\\');
+	}
+
+	regex.append(1, value);
+
+	TokenData& token_data = grammar.add_token<char>(regex);
 	data.add_symbol(token_data.get_id());
 
 	return *this;
@@ -89,6 +115,19 @@ production<TokenType>& production<TokenType>::read_value(char value)
 template <typename TokenType>
 production<TokenType>& production<TokenType>::read_value(std::string value)
 {
+	std::string regex;
+
+	for (int i = 0; i < value.length(); ++i)
+	{
+		if (is_special_character(value[i]))
+		{
+			value.insert(i, '\\');
+			++i;
+		}
+	}
+
+	regex.append(value);
+
 	TokenData& token_data = grammar.add_token<char>(value);
 	data.add_symbol(token_data.get_id());
 

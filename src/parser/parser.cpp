@@ -40,7 +40,7 @@ VariantType Parser::parse(std::istream& input)
 
 		parse_stack.push_back({ match.first, v });
 
-		reduce();
+		while (reduce());
 	}
 
 	return parse_stack[0].second;
@@ -58,7 +58,7 @@ VariantType Parser::parse_file(const std::string path)
 	return parse(file);
 }
 
-void Parser::reduce()
+bool Parser::reduce()
 {
 	for (auto& production : productions)
 	{
@@ -95,7 +95,11 @@ void Parser::reduce()
 				}
 
 				parse_stack.push_back({ production.get_id(), t });
+
+				return true;
 			}
 		}
 	}
+
+	return false;
 }

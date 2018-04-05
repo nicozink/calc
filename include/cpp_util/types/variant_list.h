@@ -1,5 +1,5 @@
 /*
-Copyright © Nico Zink
+Copyright (c) Nico Zink
 All rights reserved.
 */
 
@@ -25,7 +25,7 @@ public:
 	T& get(int i);
 
     template <typename T>
-	void push_back(const T& item);
+	void push_back_type(const T& item);
 };
 
 template <typename T>
@@ -35,10 +35,10 @@ T& VariantList::get(int i)
 }
 
 template <typename T>
-void VariantList::push_back(const T& item)
+void VariantList::push_back_type(const T& item)
 {
     VariantType type;
 	type.set(item);
 
-	std::vector<VariantType>::push_back(std::move(type));
+	push_back(std::move(type));
 }

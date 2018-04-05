@@ -27,7 +27,7 @@ public:
 
 	VariantType parse_file(const std::string path);
 
-	void reduce();
+	bool reduce();
 
 private:
 

@@ -1,5 +1,5 @@
 /*
-Copyright © Nico Zink
+Copyright (c) Nico Zink
 All rights reserved.
 */
 
@@ -25,7 +25,7 @@ TEST(VariantList, TestSimpleInteger)
 
 	int i = 42;
 
-	test_list.push_back(i);
+	test_list.push_back_type(i);
 
 	ASSERT(test_list.get<int>(0) == i);
 }
@@ -37,8 +37,8 @@ TEST(VariantList, TestDoubleInteger)
 	int i1 = 42;
 	int i2 = 87;
 
-	test_list.push_back(i1);
-	test_list.push_back(i2);
+	test_list.push_back_type(i1);
+	test_list.push_back_type(i2);
 
 	ASSERT(test_list.get<int>(0) == i1 && test_list.get<int>(1) == i2);
 }
@@ -49,7 +49,7 @@ TEST(VariantList, TestString)
 
 	std::string str("42");
 	
-	test_list.push_back(str);
+	test_list.push_back_type(str);
 
 	ASSERT(test_list.get<std::string>(0).compare(str) == 0);
 }
@@ -61,8 +61,8 @@ TEST(VariantList, TestStringIntCombo)
 	std::string str("42");
 	int i = 42;
 
-	test_list.push_back(str);
-	test_list.push_back(i);
+	test_list.push_back_type(str);
+	test_list.push_back_type(i);
 
 	ASSERT(test_list.get<std::string>(0).compare(str) == 0);
 	ASSERT(test_list.get<int>(1) == i);
