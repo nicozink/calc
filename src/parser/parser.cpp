@@ -21,23 +21,29 @@ Parser::Parser(const ParserData& pd)
 		lex.add_token(token.get_id(), token.get_regex());
 		token_lookup.insert({ token.get_id(), token });
 	}
+
+	productions = pd.productions;
 }
 
 VariantType Parser::parse(std::istream& input)
 {
-	VariantType v;
-
 	lex.parse(input);
 
 	while (lex.has_next())
 	{
+		VariantType v;
+
 		auto match = lex.get_next();
 
 		TokenData& td = token_lookup[match.first];
 		td.get_execute()(v, match.second);
+
+		parse_stack.push_back({ match.first, v });
+
+		reduce();
 	}
 
-	return v;
+	return parse_stack[0].second;
 }
 
 VariantType Parser::parse(const std::string str)
@@ -50,4 +56,46 @@ VariantType Parser::parse_file(const std::string path)
 {
 	std::ifstream file(path.c_str());
 	return parse(file);
+}
+
+void Parser::reduce()
+{
+	for (auto& production : productions)
+	{
+		std::vector<ValueToId::value_id>& symbols = production.get_symbols();
+
+		if (parse_stack.size() >= symbols.size())
+		{
+			bool sublist_matches = true;
+
+			for (int i = symbols.size(); i > 0; --i)
+			{
+				if (symbols[symbols.size() - i] != parse_stack[parse_stack.size() - i].first)
+				{
+					sublist_matches = false;
+					break;
+				}
+			}
+
+			if (sublist_matches)
+			{
+				VariantList vl;
+
+				for (int i = parse_stack.size() - symbols.size(); i < parse_stack.size(); ++i)
+				{
+					vl.push_back(parse_stack[i].second);
+				}
+
+				VariantType t;
+				production.get_execute()(t, vl);
+
+				for (int i = 0; i < symbols.size(); ++i)
+				{
+					parse_stack.pop_back();
+				}
+
+				parse_stack.push_back({ production.get_id(), t });
+			}
+		}
+	}
 }

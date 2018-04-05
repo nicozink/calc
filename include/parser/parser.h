@@ -27,9 +27,15 @@ public:
 
 	VariantType parse_file(const std::string path);
 
+	void reduce();
+
 private:
 
 	Lexer lex;
+
+	std::vector<std::pair<TypeToId::type_id, VariantType>> parse_stack;
+
+	std::vector<ProductionData> productions;
 
 	std::map<TypeToId::type_id, TokenData> token_lookup;
 };
